@@ -1,0 +1,9 @@
+{
+  "name": "simeguardian-server",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.ts",
+    "test": "node --test"
+  }
+}
