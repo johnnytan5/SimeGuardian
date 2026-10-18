@@ -31,7 +31,8 @@ const AWAKE_FROM = 6
 const AWAKE_UNTIL = 23
 
 // Typical activity events per hour: quiet nights, morning and evening peaks.
-const DAY = [0, 0, 0, 0, 0, 0, 2, 5, 4, 3, 2, 2, 3, 2, 2, 2, 2, 3, 4, 5, 4, 3, 2, 0]
+// Peaks sit near the generator cadence (~2–4/h) so today's bars and the usual pattern share a scale.
+const DAY = [0, 0, 0, 0, 0, 0, 1, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 2, 1, 0]
 const shift = (by: number) => DAY.map((_, i) => DAY[(i - by + 24) % 24])
 
 function seed(): Omit<Household, 'today' | 'lastActivity' | 'home' | 'away' | 'consented' | 'quiet' | 'alert'>[] {
@@ -52,7 +53,8 @@ export function createWorld(realNow: number): World {
     sim, lastReal: realNow, speed: 120, stepMs: 10_000, log: [],
     households: seed().map(h => ({
       ...h, today: new Array(24).fill(0), lastActivity: sim,
-      home: true, away: false, consented: false, quiet: false, alert: null,
+      // Madam Lee consents on camera; the rest of the precinct is already enrolled
+      home: true, away: false, consented: h.id !== 'lee', quiet: false, alert: null,
     })),
   }
 }

@@ -22,6 +22,7 @@ test('createWorld seeds Madam Lee at 08:00, consented false, stepMs 10000', () =
   assert.equal(new Date(w.sim).getHours(), 8)
   assert.equal(w.stepMs, 10_000)
   assert.ok(w.households.length >= 4 && w.households.length <= 5)
+  assert.ok(w.households.filter(h => h.id !== 'lee').every(h => h.consented))
 })
 
 test('goQuiet jumps sim to threshold crossing and opens CHECKIN_PENDING', () => {

@@ -1,1 +1,71 @@
-<h1>SimeGuardian</h1>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SimeGuardian</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="brand"><span class="mark">●</span> SimeGuardian <span class="sub">Township wellbeing check</span></div>
+    <div class="clock"><span id="clock">--:--</span><small>simulated time</small></div>
+  </header>
+
+  <nav>
+    <button data-tab="control" class="active">Demo control</button>
+    <button data-tab="family">Family — Daniel</button>
+    <button data-tab="security">Security console</button>
+  </nav>
+
+  <main>
+    <section id="control" class="tab active">
+      <div class="toolbar">
+        <button id="quiet" class="primary">Madam Lee goes quiet</button>
+        <button id="reset">Reset demo</button>
+        <label>Speed <select id="speed"><option value="60">1 min/s</option><option value="120" selected>2 min/s</option><option value="300">5 min/s</option></select></label>
+        <label>Escalation step <input id="step" type="number" min="1" max="120" value="10"> s</label>
+      </div>
+      <div class="grid">
+        <div>
+          <h2>Households</h2>
+          <div id="households" class="cards"></div>
+        </div>
+        <div>
+          <h2 id="chart-title">Activity vs baseline</h2>
+          <div class="panel"><svg id="chart" viewBox="0 0 720 200" role="img" aria-label="Activity chart"></svg>
+            <p id="gap" class="muted"></p>
+            <p class="legend"><span class="sw base"></span> usual pattern <span class="sw today"></span> today <span class="sw now"></span> now</p>
+          </div>
+          <h2>Event log</h2>
+          <ol id="log" class="log panel"></ol>
+        </div>
+      </div>
+    </section>
+
+    <section id="family" class="tab">
+      <div class="phone">
+        <p class="eyebrow">SimeGuardian · Family</p>
+        <h1 id="fam-status">Mum is OK</h1>
+        <p id="fam-detail" class="muted">You'll only hear from us if Mum doesn't reply to a check-in.</p>
+        <div class="actions">
+          <button id="call">Call Mum</button>
+          <button id="safe" class="primary">Mark safe</button>
+        </div>
+        <p id="toast" class="toast" hidden>Calling Mum…</p>
+      </div>
+    </section>
+
+    <section id="security" class="tab">
+      <h2>Welfare-check requests</h2>
+      <table class="panel">
+        <thead><tr><th>Unit</th><th>Resident</th><th>Escalated at</th><th>Guard</th><th></th></tr></thead>
+        <tbody id="sec-rows"></tbody>
+      </table>
+      <p id="sec-empty" class="muted">No welfare checks requested.</p>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
