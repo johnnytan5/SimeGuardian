@@ -49,6 +49,7 @@ Activity signals, the guard, and the family phone call are simulated. Nothing co
 
 ```bash
 cd server && npm test
+node --test app/src/timeout.test.ts   # from the repo root
 ```
 
 ## Docs

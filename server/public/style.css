@@ -40,7 +40,7 @@ button:disabled { opacity: .4; cursor: default; }
 #chart { width: 100%; height: auto; }
 .legend { font-size: 13px; color: var(--muted); }
 .sw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin: 0 4px 0 12px; vertical-align: -1px; }
-.sw.base { background: var(--base); } .sw.today { background: var(--today); } .sw.now { background: var(--alert); width: 3px; }
+.sw.base { background: var(--base); } .sw.today { background: var(--today); } .sw.now { background: var(--alert); width: 3px; } .sw.gap { background: var(--pending); opacity: .3; }
 .muted { color: var(--muted); }
 .log { list-style: none; margin: 0; max-height: 300px; overflow: auto; }
 .log li { padding: 6px 0; border-bottom: 1px solid var(--line); }
