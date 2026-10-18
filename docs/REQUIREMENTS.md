@@ -1,7 +1,7 @@
 # SimeGuardian — Business and Product Requirements
 
 18 October 2026 · Tan Hao Wen  
-Version 0.4 · Consolidated draft for review
+Version 0.5 · Native iPhone stack and mobile implementation plan
 
 This is the single requirements document for SimeGuardian. It combines business rationale, product behaviour, technical requirements, dataset and AI design, prototype acceptance and proposed rollout. Confirmed decisions are distinguished from design defaults and field/business proposals. This document specifies the work; it does not claim that datasets, applications, trained models or pilot results already exist.
 
@@ -19,6 +19,7 @@ This is the single requirements document for SimeGuardian. It combines business 
 - [Problem, evidence and target users](#problem-statement-and-objectives)
 - [Scope and functional requirements](#goals-and-scope)
 - [Architecture and resident journey](#high-level-implementation-and-architecture)
+- [Mobile stack and implementation plan](#mobile-app-technology-and-implementation-plan)
 - [Data sources and dataset design](#data-and-detection-requirements)
 - [AI, MLOps and recovery](#ai-and-mlops-requirements)
 - [Alert handling and app communication](#alert-handling)
@@ -35,7 +36,7 @@ SimeGuardian is an opt-in wellbeing service for elderly SDP township residents f
 - **How it works:** Combine simulated electricity, water, parking/car-plate movement, mall, gate and resident app data. Notify family in the app first; after five minutes without a response, notify the resident; after another five unanswered minutes, notify an authorised township responder. Family or resident confirmation can resolve the incident. AI may also close after sustained recovery across multiple signals, with an explicit recovery outcome and notification to involved people.
 - **Who it serves:** Elderly residents first, resident-selected family contacts and authorised township responders; broader resident groups follow after validation.
 - **Why SDP:** It explores whether permissioned township and service data can support residents after handover. Existing data access, ownership and useful reporting frequency remain to be established.
-- **Current deliverable:** A Flutter resident/family app, a web dashboard showing the data pipeline and MLOps, a designed synthetic dataset, actual model training/evaluation and an inspectable anomaly-to-app pop-up journey. Existing SDP app matching is unnecessary.
+- **Current deliverable:** A native iPhone resident/family app built with Swift and SwiftUI in Xcode, a separate web dashboard showing the data pipeline and MLOps, a designed synthetic dataset, actual model training/evaluation and an inspectable anomaly-to-app pop-up journey. Existing SDP app matching is unnecessary.
 - **Proposed next stage:** Approximately 3 months, one precinct and 30–50 elderly opt-in households, subject to software-accessible data, consent, staffing, funding and model/policy validation. No new hardware is required.
 - **Differentiation hypothesis:** Utility-based watching services exist overseas. The proposal explores combining household patterns and township context with a clear human response workflow; local novelty has not been established.
 
@@ -44,7 +45,7 @@ SimeGuardian is an opt-in wellbeing service for elderly SDP township residents f
 | Area | Agreed scope |
 | --- | --- |
 | Eligible users | Residents aged 60+ first; expand to other residents after initial validation |
-| Application | Mock resident and family app built with Flutter; matching the existing SDP app is unnecessary |
+| Application | Native iPhone app built with Swift and SwiftUI in Xcode, with resident and family roles; Android is a later scope decision |
 | Operations | Web dashboard showing the pipeline, datasets, training runs, model evaluation and inference-to-app notification delivery |
 | Monitoring unit | Detect changes at household level, then check on the enrolled resident |
 | Data sources | Combine electricity, water, parking/car-plate movement, shopping mall activity, guarded-gate access cards and resident app activity; all simulated |
@@ -57,7 +58,7 @@ SimeGuardian is an opt-in wellbeing service for elderly SDP township residents f
 | Consent | Opt-in participation, resident-selected contacts and limited responder access |
 | Withdrawal | Complete withdrawal of monitoring and sharing within 23 hours; display requested, pending and completed status |
 | Hardware | No additional sensors, wearables or other new hardware |
-| Prototype | Flutter app, web MLOps dashboard, synthetic data pipeline, real model training/evaluation and working app pop-up alerts |
+| Prototype | Native SwiftUI iPhone app, separate web MLOps dashboard, synthetic data pipeline, real model training/evaluation and working app pop-up alerts |
 
 ## Problem statement and objectives
 
@@ -74,7 +75,7 @@ A resident living alone may have no one nearby to notice a concern. The product 
 3. Test a software-only, permissioned-data approach using a transparent training and inference pipeline, with no new hardware.
 4. Explore post-handover resident engagement and a measurable community wellbeing benefit for SDP.
 
-**Prototype success** means the Flutter/web journey, dataset partitions, actual model training/evaluation, 5+5-minute response sequence and recorded human/AI-recovery outcomes in [Demonstration and acceptance](#demonstration-and-acceptance) work consistently. A later elderly-first pilot would assess usefulness, unnecessary alerts, missed concerns, response times, data access and acceptance. Numerical field targets remain proposals.
+**Prototype success** means the iOS/web journey, dataset partitions, actual model training/evaluation, 5+5-minute response sequence and recorded human/AI-recovery outcomes in [Demonstration and acceptance](#demonstration-and-acceptance) work consistently. A later elderly-first pilot would assess usefulness, unnecessary alerts, missed concerns, response times, data access and acceptance. Numerical field targets remain proposals.
 
 The proposed product explores whether permissioned data from everyday services can provide useful prompts for human check-ins. The background research does not establish the accuracy of this approach.
 
@@ -165,7 +166,7 @@ The current deliverable is the hackathon prototype. A real pilot is a separate, 
 
 Cameras or audio inside the home, real provider connections, contracts, billing, medical measurements, automatic fall detection, mental-health assessments and emergency-service dispatch are outside the prototype. Machine-learning training on synthetic data is in scope. Provider access, data frequency and lawful use must be established before a real pilot.
 
-**Prototype implementation defaults:** Use synthetic households and demo accounts. The backend emits real incident events to the Flutter client, which shows a working in-app pop-up and opens the incident when tapped. Notification controls must not invent delivery or acknowledgement. A simple baseline and one trained anomaly-model candidate are sufficient to demonstrate the MLOps lifecycle; additional AI capabilities are explored separately.
+**Prototype implementation defaults:** Use synthetic households and demo accounts. The backend emits real incident events to the iOS client, which shows a working in-app pop-up and opens the incident when tapped. Notification controls must not invent delivery or acknowledgement. A simple baseline and one trained anomaly-model candidate are sufficient to demonstrate the MLOps lifecycle; additional AI capabilities are explored separately.
 
 ### Functional requirements
 
@@ -180,7 +181,7 @@ Cameras or audio inside the home, real provider connections, contracts, billing,
 | FR-7 | Keep one unresolved incident; distinguish acknowledgement, completed human check-in and sustained multi-signal AI recovery; record outcomes, notifications and handoffs | Must, prototype |
 | FR-8 | Explore data-based water anomaly/leak insight without hardware; feasibility not yet established | Optional AI exploration |
 | FR-9 | Explore a grounded weekly family summary with minimal disclosure | Optional AI exploration |
-| FR-10 | Flutter resident/family app receives backend events and renders working pop-ups, deep links and response actions | Must, prototype |
+| FR-10 | iOS resident/family app receives backend events and renders working pop-ups, deep links and response actions | Must, prototype |
 | FR-11 | Design reproducible train/validation/test data, train a candidate model, evaluate it and record versions and metrics | Must, prototype |
 | FR-12 | Web MLOps dashboard shows pipeline, dataset/splits, runs, model versions, inference and notification traces | Must, prototype |
 
@@ -196,7 +197,7 @@ Cameras or audio inside the home, real provider connections, contracts, billing,
 
 ## High-level implementation and architecture
 
-Six synthetic source groups feed validation, past-only features, a personal baseline and trained anomaly inference. A policy creates incidents and timed app notifications. Flutter and the web dashboard share the same backend and trace identifiers; production hosting and real provider connections remain later decisions.
+Six synthetic source groups feed validation, past-only features, a personal baseline and trained anomaly inference. A policy creates incidents and timed app notifications. iOS and the web dashboard share the same backend and trace identifiers; production hosting and real provider connections remain later decisions.
 
 ```mermaid
 flowchart LR
@@ -207,8 +208,8 @@ flowchart LR
     V --> I
     I --> P["Policy checks<br/>freshness, home context, away mode"]
     P --> C["Persist one incident"]
-    C --> F["Flutter family pop-up at t0"]
-    F -- "no response for 5 min" --> R["Flutter resident pop-up"]
+    C --> F["iOS family pop-up at t0"]
+    F -- "no response for 5 min" --> R["iOS resident pop-up"]
     R -- "another 5 min unanswered" --> G["Township follow-up"]
     F -- "completed check-in" --> X["Recorded resolution"]
     R -- "resident confirmation" --> X
@@ -231,11 +232,15 @@ The simulator supplies minimal utility intervals, linked movement, app engagemen
 | Inputs | Six simulated source groups; reproducible, partitioned dataset | Confirm software-accessible feeds, permissions, intervals, latency and identity linkage |
 | Detection | Learned personal baseline, rule comparison and trained anomaly candidate | Validate accuracy, unnecessary alerts, recovery policy and baseline duration on real data |
 | Model lifecycle | Actual train/evaluate/version/select workflow visible on web | Define approval, rollback, drift review and retraining responsibilities |
-| Notifications | Backend event → Flutter family pop-up → resident after 5 unanswered minutes → township after another 5 | Establish real delivery, background push, fallback and response staffing |
-| Views | Flutter resident/family, web MLOps operator and limited township view | Establish authentication and separate operator versus participant access |
+| Notifications | Backend event → iOS family pop-up → resident after 5 unanswered minutes → township after another 5 | Establish real delivery, background push, fallback and response staffing |
+| Views | iOS resident/family, web MLOps operator and limited township view | Establish authentication and separate operator versus participant access |
 | Data | Minimal synthetic observations, versioned artifacts and shared incident history | Agree minimisation, 23-hour withdrawal, training-data disposition, encryption, retention and audit |
 
 **Hackathon prototype (23 October):** inspect the dataset split and an actual training run, activate the model, then replay an elderly resident's routine and anomaly. Trace the resulting family pop-up to the same inference event. Demonstrate the resident stage at five minutes, township at ten if unanswered, an app response and sustained AI recovery as alternative outcomes. Use demo accounts and a labelled simulation clock.
+
+## Mobile app technology and implementation plan
+
+The detailed plan is maintained in [Mobile App Implementation Plan](MOBILE_IMPLEMENTATION_PLAN.md), covering the native stack, app structure, API/events, notifications, implementation stages and verification. Product behaviour and acceptance remain in this requirements document.
 
 ## Resident and response journey
 
@@ -402,25 +407,25 @@ If the in-app alert cannot be created, show a delivery failure and do not preten
 
 ## Model-to-app communication
 
-Persist an incident after inference and policy checks, then publish a user-scoped notification event through the shared backend. The Flutter client receives that event and renders a pop-up with a minimal reason and a link to the same incident. The dashboard follows that incident and event ID through the pipeline; a hardcoded UI animation is not sufficient evidence of delivery.
+Persist an incident after inference and policy checks, then publish a user-scoped notification event through the shared backend. The iOS client receives that event and renders a pop-up with a minimal reason and a link to the same incident. The dashboard follows that incident and event ID through the pipeline; a hardcoded UI animation is not sufficient evidence of delivery.
 
 | Boundary | Minimum contract |
 | --- | --- |
 | Inference → policy | Household/window reference, score, reason codes, source coverage, model/feature/dataset versions and observation/decision times |
 | Policy → incident store | Stable incident ID, unresolved-episode key, current owner, state, aggregate reason and creation time |
-| Backend → Flutter | Event ID, incident ID, authorised recipient role, stage, minimal reason, created time, stage deadline and deep-link route |
-| Flutter → backend | Delivery/open acknowledgement where observable, explicit family response, resident confirmation or help request; server records actor, action and time |
+| Backend → iOS | Event ID, incident ID, authorised recipient role, stage, minimal reason, created time, stage deadline and deep-link route |
+| iOS → backend | Delivery/open acknowledgement where observable, explicit family response, resident confirmation or help request; server records actor, action and time |
 | Backend → dashboard | The same event and incident timeline, notification attempt/result, model reference and state transition |
 
 Use a foreground server event stream for the required demo pop-up and a persisted incident fetch after reconnection. Event IDs make retries idempotent. Notification creation, transport acceptance, client receipt, opening and a human response are distinct states; mark unknown delivery as unknown. Require a visible offline/retry case and consistent state after app restart.
 
-Background or closed-app system notifications are an additional integration to confirm. Firebase Cloud Messaging is a proposed Flutter route; foreground messages need explicit presentation handling rather than assuming an automatic pop-up ([official Flutter receiving guide](https://firebase.google.com/docs/cloud-messaging/flutter/receive-messages)). Demo accounts and app clients may receive notifications; no external SMS or calls are required. Label any simulated background-delivery path.
+Background or closed-app system notifications remain an additional integration milestone. Use Apple Push Notification service (APNs) and UserNotifications for the native iPhone path. Register and bind device tokens to the signed-in account, configure signing and the Push Notifications capability, and route a notification tap to the latest authorised incident ([Apple APNs registration](https://developer.apple.com/documentation/usernotifications/registering-your-app-with-apns), [notification handling](https://developer.apple.com/documentation/usernotifications/handling-notifications-and-notification-related-actions)). The required foreground demo uses a live backend event and a SwiftUI banner; label simulated background delivery. Demo accounts may receive alerts; no external SMS or calls are required.
 
 ## Required screens
 
 | Screen | Essential content |
 | --- | --- |
-| Flutter resident app home | Believable township app, elderly-friendly wellbeing entry point and clear demo indicator |
+| iOS resident app home | Believable township app, elderly-friendly wellbeing entry point and clear demo indicator |
 | Wellbeing setup | Consent, enrolled elderly resident, monitored home, accepted family contact and township escalation permission |
 | Wellbeing overview | Learned routine, six source-group statuses and freshness, likely-home uncertainty, gate frequency, app activity, away mode and incident history |
 | Family alert detail | Pop-up/deep link, minimal reason, observation window, delivery status, acknowledgement, contact action and completed-outcome recording |
@@ -433,7 +438,7 @@ Use large readable text, labelled controls, keyboard-accessible actions and stat
 
 Bahasa Malaysia, English and Chinese localisation, voice-call or SMS fallback, and production availability and encryption requirements remain [pilot design decisions](#non-functional-requirements). They are not additional prototype acceptance criteria.
 
-A separate dashboard demo panel can switch roles, load synthetic scenarios, reset the demonstration and advance the simulation clock. These controls are distinct from resident features. Flutter and web views share the same backend, incident IDs and clock; advancing time visibly must not be presented as real elapsed time. Synthetic operator views do not grant real family users access to training data.
+A separate dashboard demo panel can switch roles, load synthetic scenarios, reset the demonstration and advance the simulation clock. These controls are distinct from resident features. iOS and web views share the same backend, incident IDs and clock; advancing time visibly must not be presented as real elapsed time. Synthetic operator views do not grant real family users access to training data.
 
 ## Demonstration and acceptance
 
@@ -453,7 +458,7 @@ The main story follows an older resident living alone. Show the dataset and a co
 | Parking and gate logs describe the same trip, or a passage has repeated card reads | Count one movement observation; do not inflate frequency or corroboration |
 | Guarded-gate feed is unavailable | Show the missing feed and exclude it from frequency comparisons; do not record zero gate use |
 | Away mode is active or it is outside the expected active period | Do not create a new inactivity incident |
-| Model and notification pipeline replay | Match dataset, feature window, model, incident and notification IDs across dashboard and Flutter |
+| Model and notification pipeline replay | Match dataset, feature window, model, incident and notification IDs across dashboard and iOS |
 | Family alert is created | Family receives the first app pop-up; do not notify the resident before the family stage |
 | No family response for five minutes | Notify the resident at t0+5 minutes, once |
 | Neither family nor resident responds for another five minutes | Notify township at t0+10 minutes, once |
@@ -477,7 +482,7 @@ Verify the five- and ten-minute deadlines against stored server times, including
 
 ### Prototype completion
 
-Prototype completion means the Flutter and web journeys work end to end, dataset splits are inspectable, one model is actually trained and evaluated, and its inference produces the family → resident → township sequence at t0 / +5 / +10 when unanswered. Family outcomes, resident confirmation and sustained AI recovery close with distinct actors and remain consistent across views. Recovery settings are selected on validation and versioned. These are delivery criteria, not measured resident outcomes.
+Prototype completion means the iOS and web journeys work end to end, dataset splits are inspectable, one model is actually trained and evaluated, and its inference produces the family → resident → township sequence at t0 / +5 / +10 when unanswered. Family outcomes, resident confirmation and sustained AI recovery close with distinct actors and remain consistent across views. Recovery settings are selected on validation and versioned. These are delivery criteria, not measured resident outcomes.
 
 ## Parties involved and responsibilities
 
@@ -493,7 +498,7 @@ The proposal envisages SDP as platform sponsor, the selected family contact as t
 | Parking and mall operators | Potential minimal linked context feeds, subject to permission and reliable identity linkage | Potential resident-service partnership | No connection or agreement established |
 | Air Selangor | Potential consented interval water data | Possible resident-service partnership | Not yet approached; no committed phase |
 | TNB | Potential consented electricity data with useful latency | Possible resident-service partnership | Not yet approached; no committed phase |
-| Hackathon team | Flutter app, web dashboard, dataset design, pipeline, model training/evaluation and demo | Prototype and feasibility evidence | Active; implementation follows document review |
+| Hackathon team | iOS app, web dashboard, dataset design, pipeline, model training/evaluation and demo | Prototype and feasibility evidence | Active; implementation follows document review |
 
 **Key dependency:** township systems may be operated by a residents' association, management body or contractor after handover. Do not assume SDP controls any feed. Before a pilot, establish operator permission and agreements for each proposed source, identity linkage and whether both required utility feeds meet the chosen interval and latency needs.
 
@@ -638,7 +643,7 @@ The [confirmed decisions](#confirmed-product-decisions) define the current scope
 | R1. Challenge category | People / Community Wellbeing remains the working category; safety/accessibility support it | Confirm the category if a different hackathon focus is intended |
 | R2. Dataset defaults | Proposed 120 elderly households, 90 days, 15-minute intervals, 14-day causal warm-up, household groups 84/18/18 and chronological evaluation | Coverage, volume and generator settings before creation; real representativeness remains unproven |
 | R3. Detection and recovery experiment | Rule comparison at 20%/60 minutes; proposed Isolation Forest candidate; proposed 30-minute multi-signal recovery | Model/feature choices and thresholds selected on validation, with false-closure measurement |
-| R4. Field data and software delivery | No real provider access is assumed; no hardware is permitted; foreground Flutter pop-up is required | Useful feeds, existing-app integration and whether to demonstrate background/closed-app push |
+| R4. Field data and software delivery | No real provider access is assumed; no hardware is permitted; foreground iOS pop-up is required | Useful feeds, existing-app integration and whether to demonstrate background/closed-app push |
 | R5. Pilot and outcome targets | Proposed 30–50 elderly households, approximately 3 months, baseline/shadow period, drills and numerical KPI targets | Staffing, budget, duration and realistic field targets; broader scaling only after initial validation |
 | R6. Funding and packaging | Free pilot and RM25–35 monthly software contribution remain hypotheses | Payer, price and packaging after costs and demand are understood; no equipment deposit |
 | R7. Added AI and accessibility | Explore grounded explanations, summaries, drift and water insights; localisation/fallback remain candidates | Prioritise additions after the core trained-model-to-app journey works |
@@ -681,7 +686,12 @@ The [confirmed decisions](#confirmed-product-decisions) define the current scope
 - [SDP University Hackathon 2026 briefing: team reference summary](</Users/limjiale/SDP Hackathon/SDP_HACKATHON_REFERENCE.md>)
 - [scikit-learn: avoiding data leakage](https://scikit-learn.org/stable/common_pitfalls.html)
 - [scikit-learn: Isolation Forest](https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.IsolationForest.html)
-- [Firebase: receiving messages in Flutter](https://firebase.google.com/docs/cloud-messaging/flutter/receive-messages)
+- [Apple: managing model data in SwiftUI](https://developer.apple.com/documentation/swiftui/managing-model-data-in-your-app)
+- [Apple: URLSessionWebSocketTask](https://developer.apple.com/documentation/foundation/urlsessionwebsockettask)
+- [Apple: asking notification permission](https://developer.apple.com/documentation/usernotifications/asking-permission-to-use-notifications)
+- [Apple: registering with APNs](https://developer.apple.com/documentation/usernotifications/registering-your-app-with-apns)
+- [Apple: handling notifications](https://developer.apple.com/documentation/usernotifications/handling-notifications-and-notification-related-actions)
+- [Apple: choosing background strategies](https://developer.apple.com/documentation/backgroundtasks/choosing-background-strategies-for-your-app)
 
 ## Supporting material
 
