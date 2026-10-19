@@ -46,13 +46,6 @@ button:disabled { opacity: .4; cursor: default; }
 .log li { padding: 6px 0; border-bottom: 1px solid var(--line); }
 .log li:last-child { border: 0; }
 .log time { font-variant-numeric: tabular-nums; font-weight: 600; margin-right: 10px; }
-.phone { max-width: 380px; margin: 20px auto; background: var(--panel); border: 1px solid var(--line); border-radius: 28px; padding: 28px; }
-.phone h1 { font-size: 28px; line-height: 1.2; margin: 8px 0; }
-.phone.pending h1 { color: var(--pending); } .phone.alert h1 { color: var(--alert); } .phone.ok h1 { color: var(--ok); }
-.eyebrow { font-size: 13px; color: var(--muted); margin: 0; }
-.actions { display: flex; gap: 10px; margin-top: 20px; }
-.actions button { flex: 1; padding: 14px; }
-.toast { background: var(--ink); color: #fff; border-radius: 8px; padding: 8px 12px; text-align: center; }
 table { width: 100%; border-collapse: collapse; padding: 0; overflow: hidden; }
 th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--line); }
 th { font-size: 13px; color: var(--muted); font-weight: 600; }

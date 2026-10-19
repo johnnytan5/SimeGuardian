@@ -25,8 +25,6 @@ $('quiet').onclick = () => post('/api/households/lee/quiet').then(refresh)
 $('reset').onclick = () => post('/api/reset').then(refresh)
 $('speed').onchange = e => post('/api/settings', { speed: Number(e.target.value) })
 $('step').onchange = e => post('/api/settings', { stepMs: Number(e.target.value) * 1000 })
-$('safe').onclick = () => post('/api/households/lee/checkin', { actor: 'family' }).then(refresh)
-$('call').onclick = () => { $('toast').hidden = false; setTimeout(() => $('toast').hidden = true, 2000) }
 
 function renderControl(s) {
   $('households').innerHTML = s.households.map(h => {
@@ -71,23 +69,6 @@ function renderChart(h, sim) {
     <line x1="0" x2="${W}" y1="${H}" y2="${H}" stroke="var(--line)"/>${ticks}`
 }
 
-function renderFamily(f) {
-  const text = {
-    OK: ['Mum is OK', 'ok', "You'll only hear from us if Mum doesn't reply to a check-in."],
-    CHECKIN_PENDING: ['Check-in sent to Mum', 'pending', 'Her home has been unusually quiet. We have asked her if she is OK.'],
-    ESCALATED: ["Mum hasn't responded — please check on her", 'alert', 'Call her now, or mark her safe once you have spoken to her.'],
-  }
-  let [title, cls, detail] = text[f.status]
-  if (f.alertState === 'RESOLVED') [title, cls, detail] = ['Resolved — Mum is safe', 'ok', 'Thank you. The alert is closed.']
-  if (f.alertState === 'SECURITY_ESCALATED') detail = 'Township security has been asked to check on her at home.'
-  $('fam-status').textContent = title
-  $('fam-detail').textContent = detail
-  document.querySelector('.phone').className = `phone ${cls}`
-  const open = f.status !== 'OK'
-  $('safe').disabled = !open
-  $('call').disabled = !open
-}
-
 const GUARD_ACTION = { NONE: 'Assign guard', ASSIGNED: 'Mark on the way', ON_THE_WAY: 'Mark arrived — resident safe' }
 const GUARD_LABEL = { NONE: 'Waiting', ASSIGNED: 'Assigned', ON_THE_WAY: 'On the way', ARRIVED_SAFE: 'Arrived — resident safe' }
 
@@ -106,7 +87,6 @@ async function refresh() {
     if (document.activeElement !== $('step')) $('step').value = s.stepMs / 1000
     if (document.activeElement !== $('speed')) $('speed').value = String(s.speed)
     if (tab === 'control') renderControl(s)
-    if (tab === 'family') renderFamily(await (await fetch('/api/family/lee')).json())
     if (tab === 'security') renderSecurity(await (await fetch('/api/security')).json())
   } catch { $('clock').textContent = 'offline' }
 }

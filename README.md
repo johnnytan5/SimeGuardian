@@ -13,7 +13,7 @@ You need Node 24 on the Mac and the **Expo Go** app on an iPhone. The Mac and th
    cd server
    npm start
    ```
-   Open <http://localhost:4000>. Tabs: Demo control, Family (Daniel), Security console.
+   Open <http://localhost:4000>. Tabs: Demo control, Security console. All resident and family screens are in the Expo app.
 
 2. **Resident app (Madam Lee)**
    ```bash
@@ -30,15 +30,15 @@ You need Node 24 on the Mac and the **Expo Go** app on an iPhone. The Mac and th
    At a venue whose Wi-Fi isolates devices, use the phone's hotspot, or `npx expo start --tunnel` together with the URL override.
 
 ### Scenario A: escalation
-1. On the phone, go through onboarding and tap **I agree**.
+1. On the phone, pick **Madam Lee (resident)**, go through onboarding and tap **I agree**.
 2. Let the dashboard run for a moment, then click **Madam Lee goes quiet**.
 3. The phone shows a notification, then the "Are you OK?" pop-up with a countdown.
-4. Don't tap anything. After 10 s, Daniel is notified (Family tab).
+4. Don't tap anything. After 10 s, Daniel is notified. Tap **Demo · switch to Daniel (family)** at the bottom of the phone to see his alert, with **Call Mum** and **Mark safe**.
 5. After another 10 s, a welfare check appears on the Security console. Click through **Assign guard → Mark on the way → Mark arrived**.
 6. The phone shows "All clear". The event log reads like real time (+30 min, +15 min, +2, +3, +3).
 
 ### Scenario B: happy path
-Click **Reset demo**. The phone returns to onboarding. Repeat steps 1–3, then tap **I'm OK** on the phone, and every screen closes the alert.
+Click **Reset demo** and switch the phone back to Madam Lee. It returns to onboarding. Repeat steps 1–3, then tap **I'm OK** on the phone, and every screen closes the alert.
 
 The escalation step (default 10 s) and the clock speed can be changed on the Demo control tab.
 
