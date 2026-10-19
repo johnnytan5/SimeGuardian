@@ -31,6 +31,12 @@ test('bad JSON body → 400', async () => {
   assert.equal((await post('/api/households/lee/checkin', 'not json')).status, 400)
 })
 
+test('GET /api/model returns the latest training run report', async () => {
+  const r = await (await fetch(base + '/api/model')).json()
+  assert.match(r.run_id, /^run-/)
+  assert.ok(r.test.rule && r.test.model)
+})
+
 test('GET / serves the dashboard html', async () => {
   const r = await fetch(base + '/')
   assert.equal(r.status, 200)

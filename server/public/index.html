@@ -15,6 +15,7 @@
   <nav>
     <button data-tab="control" class="active">Demo control</button>
     <button data-tab="security">Security console</button>
+    <button data-tab="model">Model</button>
   </nav>
 
   <main>
@@ -49,6 +50,22 @@
         <tbody id="sec-rows"></tbody>
       </table>
       <p id="sec-empty" class="muted">No welfare checks requested.</p>
+    </section>
+    <section id="model" class="tab">
+      <p class="muted">Prior training run, replayed for the demo. Retrain with <code>ml/.venv/bin/python ml/train.py</code>.</p>
+      <div id="inference" class="panel"></div>
+      <h2>Run</h2>
+      <div id="run" class="panel"></div>
+      <h2>Rule vs model</h2>
+      <table class="panel">
+        <thead><tr><th>Method</th><th>Validation F1</th><th>Test recall</th><th>Test precision</th><th>False alerts / household-day</th><th>Median delay</th></tr></thead>
+        <tbody id="compare"></tbody>
+      </table>
+      <h2>Dataset splits</h2>
+      <table class="panel">
+        <thead><tr><th>Split</th><th>Households</th><th>Days</th><th>Scored hours</th><th>Concern prevalence</th></tr></thead>
+        <tbody id="splits"></tbody>
+      </table>
     </section>
   </main>
 

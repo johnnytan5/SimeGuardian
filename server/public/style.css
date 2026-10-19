@@ -49,3 +49,6 @@ button:disabled { opacity: .4; cursor: default; }
 table { width: 100%; border-collapse: collapse; padding: 0; overflow: hidden; }
 th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--line); }
 th { font-size: 13px; color: var(--muted); font-weight: 600; }
+tr.selected td { background: var(--base); }
+code { background: var(--line); padding: 1px 5px; border-radius: 4px; }
+#inference { margin-top: 8px; }

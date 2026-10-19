@@ -5,6 +5,7 @@ import { advanceGuard, checkIn, consent, createWorld, goQuiet, reset, setAway, t
 import { dashboardView, familyView, residentView, securityView } from './views.ts'
 
 const PUBLIC = join(import.meta.dirname, '..', 'public')
+const LATEST_RUN = join(import.meta.dirname, '..', '..', 'ml', 'runs', 'latest.json')
 const TYPES: Record<string, string> = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css' }
 
 class HttpError extends Error {
@@ -31,6 +32,9 @@ export function startServer(port: number): Promise<http.Server> {
       if (kind === 'resident' && id) return residentView(world, id, now)
       if (kind === 'family' && id) return familyView(world, id)
       if (kind === 'security') return securityView(world)
+      if (kind === 'model') {
+        try { return JSON.parse(await readFile(LATEST_RUN, 'utf8')) } catch { throw new HttpError(404, 'no training run yet: run ml/train.py') }
+      }
     }
     if (req.method === 'POST') {
       const body = await readJson(req)

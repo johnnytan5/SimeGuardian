@@ -13,7 +13,7 @@ You need Node 24 on the Mac and the **Expo Go** app on an iPhone. The Mac and th
    cd server
    npm start
    ```
-   Open <http://localhost:4000>. Tabs: Demo control, Security console. All resident and family screens are in the Expo app.
+   Open <http://localhost:4000>. Tabs: Demo control, Security console, Model. All resident and family screens are in the Expo app.
 
 2. **Resident app (Madam Lee)**
    ```bash
@@ -43,13 +43,23 @@ Click **Reset demo** and switch the phone back to Madam Lee. It returns to onboa
 The escalation step (default 10 s) and the clock speed can be changed on the Demo control tab.
 
 ### What is simulated
-Activity signals, the guard, and the family phone call are simulated. Nothing connects to real plate recognition, access cards, water sensors, Air Selangor or TNB yet (BRD phases 2–3). The engine uses rules plus a per-household baseline, not a trained model.
+Activity signals, the guard, and the family phone call are simulated. Nothing connects to real plate recognition, access cards, Air Selangor or TNB yet. The live demo clock runs the rule engine; the **Model** tab shows a real prior training run and labels its live-inference line as a demo replay.
+
+## Model training
+
+`ml/` generates a synthetic dataset (120 elderly households × 90 days of 15-minute electricity and water, plus app and gate events, with labelled concern episodes, naps, away trips and feed outages), builds past-only hourly features, splits households 70/15/15 with separate date ranges, trains an Isolation Forest on normal training windows, picks thresholds on validation and scores the untouched test split once against the rule baseline.
+
+```bash
+python3 -m venv ml/.venv && ml/.venv/bin/pip install -r ml/requirements.txt
+ml/.venv/bin/python ml/train.py     # writes ml/runs/<run_id>/ and ml/runs/latest.json
+```
 
 ## Tests
 
 ```bash
 cd server && npm test
 node --test app/src/timeout.test.ts   # from the repo root
+ml/.venv/bin/python -m unittest discover ml
 ```
 
 ## Docs

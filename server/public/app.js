@@ -80,6 +80,28 @@ function renderSecurity(items) {
   document.querySelectorAll('#sec-rows button').forEach(b => b.onclick = () => post(`/api/households/${b.dataset.id}/guard`).then(refresh))
 }
 
+let run = null
+
+function renderModel(s) {
+  if (!run) { $('run').textContent = 'No training run yet: run ml/train.py.'; return }
+  const lee = s.households.find(h => h.id === 'lee')
+  const open = lee.alert && lee.alert.state !== 'RESOLVED'
+  $('inference').innerHTML = open
+    ? `<b>Live inference (demo):</b> ${esc(lee.resident)} · hourly window flagged by <b>${esc(run.policy.selected)}</b> · ${esc(run.policy.version)} · ${esc(run.run_id)} · incident ${hhmm(lee.alert.startedSim)}`
+    : '<span class="muted">Live inference (demo): no window flagged.</span>'
+  const d = run.dataset
+  $('run').innerHTML = `<b>${esc(run.run_id)}</b> · ${esc(run.status)} · finished ${new Date(run.finished_at).toLocaleString('en-GB')}<br>
+    Dataset ${esc(d.generator)} seed ${d.seed} · checksum ${esc(d.checksum)} · ${d.households} households × ${d.days} days at ${d.interval_min}-min intervals · ${d.episodes} labelled concern episodes<br>
+    ${esc(run.model.type)} (${run.model.n_estimators} trees) trained on ${run.model.trained_on.toLocaleString()} normal hourly windows · features ${esc(run.features.version)}: ${run.features.names.map(esc).join(', ')}`
+  $('compare').innerHTML = Object.keys(run.test).map(k => {
+    const v = run.validation[k], t = run.test[k]
+    return `<tr${k === run.policy.selected ? ' class="selected"' : ''}><td>${esc(k)}${k === run.policy.selected ? ' <span class="badge">selected</span>' : ''}</td>
+      <td>${v.f1}</td><td>${t.detected}/${t.episodes}</td><td>${t.alert_precision}</td><td>${t.false_alerts_per_household_day}</td><td>${t.median_detection_delay_h ?? '–'} h</td></tr>`
+  }).join('')
+  $('splits').innerHTML = Object.entries(run.splits).map(([k, p]) =>
+    `<tr><td>${k}</td><td>${p.households}</td><td>${p.days[0]}–${p.days[1]}</td><td>${p.scored_windows.toLocaleString()}</td><td>${(p.concern_prevalence * 100).toFixed(2)}%</td></tr>`).join('')
+}
+
 async function refresh() {
   try {
     const s = await (await fetch('/api/state')).json()
@@ -88,6 +110,10 @@ async function refresh() {
     if (document.activeElement !== $('speed')) $('speed').value = String(s.speed)
     if (tab === 'control') renderControl(s)
     if (tab === 'security') renderSecurity(await (await fetch('/api/security')).json())
+    if (tab === 'model') {
+      if (!run) { const r = await fetch('/api/model'); if (r.ok) run = await r.json() }
+      renderModel(s)
+    }
   } catch { $('clock').textContent = 'offline' }
 }
 
