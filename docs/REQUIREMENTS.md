@@ -33,7 +33,7 @@ This is the single requirements document for SimeGuardian. It combines business 
 SimeGuardian is an opt-in wellbeing service for elderly SDP township residents first, with expansion to other residents after initial validation. It combines household routines, likely-home context and AI anomaly detection, prompts a check-in when a pattern changes unexpectedly, and records responses and recovery. The initial cohort is residents aged 60+ who live alone or spend long periods alone.
 
 - **Focus area:** Theme 1 People, Community Wellbeing, addressing physical wellbeing through follow-up and mental wellbeing through human contact. No mental-health assessment or loneliness inference is included.
-- **How it works:** Combine simulated electricity, water, parking/car-plate movement, mall, gate and resident app data. Notify family in the app first; after five minutes without a response, notify the resident; after another five unanswered minutes, notify an authorised township responder. Family or resident confirmation can resolve the incident. AI may also close after sustained recovery across multiple signals, with an explicit recovery outcome and notification to involved people.
+- **How it works:** Combine simulated electricity, water, parking/car-plate movement, mall, gate and resident app data. Ask the resident to check in through an app pop-up first; after five minutes without a response, notify the selected family contact; after another five unanswered minutes, notify an authorised township responder. Family or resident confirmation can resolve the incident. AI may also close after sustained recovery across multiple signals, with an explicit recovery outcome and notification to involved people.
 - **Who it serves:** Elderly residents first, resident-selected family contacts and authorised township responders; broader resident groups follow after validation.
 - **Why SDP:** It explores whether permissioned township and service data can support residents after handover. Existing data access, ownership and useful reporting frequency remain to be established.
 - **Current deliverable:** A native iPhone resident/family app built with Swift and SwiftUI in Xcode, a separate web dashboard showing the data pipeline and MLOps, a designed synthetic dataset, actual model training/evaluation and an inspectable anomaly-to-app pop-up journey. Existing SDP app matching is unnecessary.
@@ -53,7 +53,7 @@ SimeGuardian is an opt-in wellbeing service for elderly SDP township residents f
 | Dataset | Reproducible synthetic training and validation data plus an untouched test set, with household and time separation |
 | Safeguards | Away mode, corroborating signals, and explicit handling of missing or delayed data |
 | Mental wellbeing | Human check-ins only; no mental-health assessment |
-| Response | Family app alert at t0; resident at t0+5 minutes without response; township at t0+10 minutes if still unanswered |
+| Response | Resident app check-in at t0; family at t0+5 minutes without response; township at t0+10 minutes if still unanswered |
 | Resolution | Family records an outcome in app, resident confirms wellbeing, or AI records sustained recovery across independent signals |
 | Consent | Opt-in participation, resident-selected contacts and limited responder access |
 | Withdrawal | Complete withdrawal of monitoring and sharing within 23 hours; display requested, pending and completed status |
@@ -116,9 +116,9 @@ Target elderly residents aged 60+ first, particularly those living alone or alon
 | Segment | Who | Role in the service | Scope |
 | --- | --- | --- | --- |
 | Initial resident | Opt-in resident aged 60+ living alone or alone for long periods | Gives consent, selects contacts, controls away mode and can confirm wellbeing | Initial cohort and main demonstration |
-| Selected family contact | Adult child or close relative chosen by the resident | Receives the first alert, acknowledges responsibility and records the outcome | Prototype role; payer role unconfirmed |
+| Selected family contact | Adult child or close relative chosen by the resident | Receives an alert when the resident has not answered a check-in for five minutes, acknowledges responsibility and records the outcome | Prototype role; payer role unconfirmed |
 | Expansion residents | Other adults living alone or seeking wellbeing support, including those managing long-term conditions | Same consent-led workflow, without medical assessment | Later expansion after initial validation |
-| Authorised township responder | Designated security or management responder | Receives an incident after family and resident remain unanswered for 5 minutes each | Simulated role; real staffing to confirm |
+| Authorised township responder | Designated security or management responder | Receives an incident after resident and family remain unanswered for 5 minutes each | Simulated role; real staffing to confirm |
 | Data / MLOps operator | Team member responsible for the model and pipeline | Inspects synthetic data, training, validation, model versions and notification traces | Web dashboard; separate from family access |
 
 **Persona: Madam Lee, 72.** Widowed, lives alone in a terrace house in a guarded SDP precinct. She uses WhatsApp but rarely opens other apps, and won't wear a pendant because it "makes her feel old."
@@ -134,7 +134,7 @@ Different household routines require validation. The prototype uses labelled syn
 | Resident | Receive support while retaining control | Opt in, review connected sources, select contacts, set away mode, view own alerts, confirm wellbeing or request contact, withdraw participation |
 | Selected family contact | Know when to check in and avoid duplicate responses | View alerts for the linked resident, acknowledge responsibility, record contact attempts and the check-in outcome |
 | Data / MLOps operator | Inspect how an alert was produced | Web-only view of synthetic pipeline health, dataset versions and splits, training runs, metrics, model versions and notification traces |
-| Authorised township responder | Follow up after the family and resident stages | Assigned incident and necessary details only; receives an unanswered incident at t0+10 minutes |
+| Authorised township responder | Follow up after the resident and family stages | Assigned incident and necessary details only; receives an unanswered incident at t0+10 minutes |
 
 Responders do not receive utility histories, purchase details or movement trails. Sharing is limited to the incident and the information needed for follow-up. A person's activity must not be attributed to another household member.
 
@@ -160,7 +160,7 @@ The business hypothesis is that useful check-ins and clearer follow-up support r
 
 The prototype must demonstrate a complete journey from an unusual household pattern to a recorded human check-in outcome or sustained multi-signal AI recovery. Residents and contacts must understand why an alert was raised, who is responding, and whether follow-up remains outstanding.
 
-The first version includes enrolment, contact permissions, six simulated source groups, personal baseline learning, a trained anomaly model, away mode, the family → resident → township 5+5-minute workflow, response and recovery tracking, incident history and a web MLOps dashboard.
+The first version includes enrolment, contact permissions, six simulated source groups, personal baseline learning, a trained anomaly model, away mode, the resident → family → township 5+5-minute workflow, response and recovery tracking, incident history and a web MLOps dashboard.
 
 The current deliverable is the hackathon prototype. A real pilot is a separate, conditional next stage described in the [proposed pilot plan](#proposed-pilot-plan). Data is simulated from existing-service concepts; no physical water sensor or other hardware is to be purchased or installed. Resident app usage is included as context. Water leak warnings and weekly family summaries remain optional AI exploration candidates rather than required additions.
 
@@ -176,7 +176,7 @@ Cameras or audio inside the home, real provider connections, contracts, billing,
 | FR-2 | Learn a household routine from past synthetic history for comparable days, windows and expected active periods | Must, prototype |
 | FR-3 | Combine six minimal simulated source groups, including resident app activity, with identity scope, freshness and deduplicated movement context | Must, prototype |
 | FR-4 | Compare a trained anomaly model with the rule baseline; apply likely-home context, corroboration, away mode and missing-data safeguards | Must, prototype |
-| FR-5 | App alert to family at t0; resident at t0+5 minutes without response; township at t0+10 minutes if still unanswered | Must, prototype |
+| FR-5 | App check-in to the resident at t0; family at t0+5 minutes without response; township at t0+10 minutes if still unanswered | Must, prototype |
 | FR-6 | Resident controls away mode; complete withdrawal of monitoring/sharing within 23 hours, with visible request, deadline and completion | Must, prototype |
 | FR-7 | Keep one unresolved incident; distinguish acknowledgement, completed human check-in and sustained multi-signal AI recovery; record outcomes, notifications and handoffs | Must, prototype |
 | FR-8 | Explore data-based water anomaly/leak insight without hardware; feasibility not yet established | Optional AI exploration |
@@ -187,7 +187,7 @@ Cameras or audio inside the home, real provider connections, contracts, billing,
 
 ### Non-functional requirements
 
-- **Prototype timing:** persist t0 and calculate resident and township deadlines at t0+5 and t0+10 minutes. Preserve them across refresh and label accelerated demo time. Track the 23-hour withdrawal deadline separately.
+- **Prototype timing:** persist t0 and calculate family and township deadlines at t0+5 and t0+10 minutes. Preserve them across refresh and label accelerated demo time. Track the 23-hour withdrawal deadline separately.
 - **Prototype consistency:** all roles share one incident and clock. Source availability is separate from check-in status. No automated green "Resident safe" status or invented health-risk score.
 - **Prototype accessibility:** large readable text, labelled controls, keyboard access and status text alongside colour.
 - **Prototype privacy:** synthetic inputs, minimal role views and withdrawal completed within 23 hours. Show pending until effective; no new monitoring/sharing after completion. Simulated roles do not establish production access control.
@@ -208,9 +208,9 @@ flowchart LR
     V --> I
     I --> P["Policy checks<br/>freshness, home context, away mode"]
     P --> C["Persist one incident"]
-    C --> F["iOS family pop-up at t0"]
-    F -- "no response for 5 min" --> R["iOS resident pop-up"]
-    R -- "another 5 min unanswered" --> G["Township follow-up"]
+    C --> R["iOS resident check-in pop-up at t0"]
+    R -- "no response for 5 min" --> F["iOS family pop-up"]
+    F -- "another 5 min unanswered" --> G["Township follow-up"]
     F -- "completed check-in" --> X["Recorded resolution"]
     R -- "resident confirmation" --> X
     G -- "recorded outcome" --> X
@@ -232,11 +232,11 @@ The simulator supplies minimal utility intervals, linked movement, app engagemen
 | Inputs | Six simulated source groups; reproducible, partitioned dataset | Confirm software-accessible feeds, permissions, intervals, latency and identity linkage |
 | Detection | Learned personal baseline, rule comparison and trained anomaly candidate | Validate accuracy, unnecessary alerts, recovery policy and baseline duration on real data |
 | Model lifecycle | Actual train/evaluate/version/select workflow visible on web | Define approval, rollback, drift review and retraining responsibilities |
-| Notifications | Backend event → iOS family pop-up → resident after 5 unanswered minutes → township after another 5 | Establish real delivery, background push, fallback and response staffing |
+| Notifications | Backend event → iOS resident check-in pop-up → family after 5 unanswered minutes → township after another 5 | Establish real delivery, background push, fallback and response staffing |
 | Views | iOS resident/family, web MLOps operator and limited township view | Establish authentication and separate operator versus participant access |
 | Data | Minimal synthetic observations, versioned artifacts and shared incident history | Agree minimisation, 23-hour withdrawal, training-data disposition, encryption, retention and audit |
 
-**Hackathon prototype (23 October):** inspect the dataset split and an actual training run, activate the model, then replay an elderly resident's routine and anomaly. Trace the resulting family pop-up to the same inference event. Demonstrate the resident stage at five minutes, township at ten if unanswered, an app response and sustained AI recovery as alternative outcomes. Use demo accounts and a labelled simulation clock.
+**Hackathon prototype (23 October):** inspect the dataset split and an actual training run, activate the model, then replay an elderly resident's routine and anomaly. Trace the resulting resident check-in pop-up to the same inference event. Demonstrate the family stage at five minutes, township at ten if unanswered, an app response and sustained AI recovery as alternative outcomes. Use demo accounts and a labelled simulation clock.
 
 ## Mobile app technology and implementation plan
 
@@ -248,8 +248,8 @@ The detailed plan is maintained in [Mobile App Implementation Plan](MOBILE_IMPLE
 2. **Establish the usual routine:** Generate realistic synthetic history and learn a household baseline from past observations. Seeded history makes onboarding demonstrable without waiting two real weeks; no future observations may enter the baseline.
 3. **Compare signals:** Compare valid electricity and water intervals with that routine. Parking/car-plate movement, mall, gate and resident app activity add identity-aware context about recent activity and whether the resident may be home.
 4. **Identify a concern:** A rule or model candidate passes freshness, corroboration, away-mode and conflicting-context checks before creating one incident. Record the model, data and rule versions that produced it.
-5. **Alert family first:** The linked family account receives an app pop-up with a minimal reason, time, incident link and response actions. Delivery, opening and acknowledgement are separate events.
-6. **Then alert the resident:** At t0+5 minutes, if the family has not responded, send the resident pop-up with confirmation/contact actions. If neither family nor resident responds by t0+10 minutes, escalate the same incident to the authorised township responder.
+5. **Ask the resident first:** The resident receives an app check-in pop-up with a minimal reason, “I'm okay” and request-contact actions. Delivery, opening and response are separate events. Asking the resident first respects their autonomy and avoids worrying family over a nap or a quiet afternoon.
+6. **Then alert family:** At t0+5 minutes, if the resident has not responded, the linked family account receives a pop-up with a minimal reason, time, incident link and response actions. If neither resident nor family responds by t0+10 minutes, escalate the same incident to the authorised township responder.
 7. **Follow through:** Family can acknowledge responsibility or record a completed check-in outcome inside the app. A resident confirmation closes with an explicit outcome. The dashboard and app show one consistent timeline.
 8. **Observe recovery:** Record whether usual activity resumes, including meaningful activity attributable to the resident. When the sustained multi-signal recovery policy is satisfied, AI closes with an explicit system outcome and notifies involved people. Show “Activity pattern recovered,” distinct from a personal wellbeing confirmation.
 
@@ -388,16 +388,16 @@ Away mode has a start and end time. It pauses creation of new inactivity inciden
 
 | State | Meaning and next action |
 | --- | --- |
-| Awaiting family | Family alert is created first; show its delivery and response status |
+| Awaiting resident | Resident check-in pop-up is created first; show its delivery and response status |
+| Family notified | Five minutes passed without resident response; family pop-up sent |
 | Family checking in | A selected family contact has taken responsibility; follow-up remains open |
-| Resident notified | Five minutes passed without family response; resident pop-up sent |
 | Activity resumed | Recovery evidence is accumulating; the sustained closure condition is not yet met |
-| Township follow-up | Ten minutes passed with no family or resident response; township receives the same incident |
+| Township follow-up | Ten minutes passed with no resident or family response; township receives the same incident |
 | Resolved | Recorded family outcome, resident confirmation or explicitly identified AI sustained-recovery outcome |
 
-Family is notified before the resident. A family member can select “I will check in” or record “Contact made / check-in completed” with an outcome; these are different actions. Viewing an alert is not acknowledgement. A completed family outcome or resident confirmation resolves the incident and updates all views. Avoid duplicate incidents and preserve late responses in the timeline.
+The resident is asked before family is notified. A family member can select “I will check in” or record “Contact made / check-in completed” with an outcome; these are different actions. Viewing an alert is not acknowledgement. A completed family outcome or resident confirmation resolves the incident and updates all views. Avoid duplicate incidents and preserve late responses in the timeline.
 
-**Confirmed timing:** t0 is the successful creation of the first family in-app alert. At t0+5 minutes without family acknowledgement or an outcome, notify the resident. At t0+10 minutes without a family acknowledgement or resident response, notify township once. A family acknowledgement at either stage stops later unanswered stages and assigns responsibility, but follow-up remains open. A resident help/contact request counts as a response, remains visibly open with an action owner, and prevents AI closure until explicitly addressed. It does not mean the resident is okay. Completed outcomes resolve and cancel unsent stages. Calculate deadlines from persisted server timestamps, including after refresh or demo-clock advancement; reject a later stage if an earlier response or resolution has already cancelled it.
+**Confirmed timing:** t0 is the successful creation of the resident's in-app check-in. At t0+5 minutes without a resident response, notify family. At t0+10 minutes without a resident response or family acknowledgement, notify township once. A family acknowledgement stops the township stage and assigns responsibility, but follow-up remains open. A resident help/contact request counts as a response, remains visibly open with an action owner, and prevents AI closure until explicitly addressed. It does not mean the resident is okay. Completed outcomes resolve and cancel unsent stages. Calculate deadlines from persisted server timestamps, including after refresh or demo-clock advancement; reject a later stage if an earlier response or resolution has already cancelled it.
 
 **Confirmed AI closure:** use the sustained recovery policy above, with separately versioned experimental thresholds. A resident pressing “I'm okay” is a human confirmation; AI-observed recovery is a system outcome. Preserve that distinction in notifications, incident history and metrics.
 
@@ -429,7 +429,7 @@ Background or closed-app system notifications remain an additional integration m
 | Wellbeing setup | Consent, enrolled elderly resident, monitored home, accepted family contact and township escalation permission |
 | Wellbeing overview | Learned routine, six source-group statuses and freshness, likely-home uncertainty, gate frequency, app activity, away mode and incident history |
 | Family alert detail | Pop-up/deep link, minimal reason, observation window, delivery status, acknowledgement, contact action and completed-outcome recording |
-| Resident alert detail | Subsequent alert, “I'm okay,” request-contact action and visible family response/recovery status |
+| Resident alert detail | First check-in pop-up, “I'm okay,” request-contact action and visible family response/recovery status |
 | Web MLOps dashboard | Pipeline, dataset/split explorer, training, evaluation, model version, inference and notification trace views |
 | Township response | Assigned escalation and necessary details with explicit owner, cancellation acknowledgement and handoff |
 | Sharing controls | Contacts, monitoring permissions and withdrawal request/deadline/completion within 23 hours |
@@ -442,7 +442,7 @@ A separate dashboard demo panel can switch roles, load synthetic scenarios, rese
 
 ## Demonstration and acceptance
 
-The main story follows an older resident living alone. Show the dataset and a completed training run, activate a model, replay a normal routine, then introduce a deviation. Trace the same feature window through inference and the family pop-up, the resident stage at five unanswered minutes and township at ten. Demonstrate family response, resident confirmation and sustained AI recovery as separate resolution paths.
+The main story follows an older resident living alone. Show the dataset and a completed training run, activate a model, replay a normal routine, then introduce a deviation. Trace the same feature window through inference and the resident check-in pop-up, the family stage at five unanswered minutes and township at ten. Demonstrate family response, resident confirmation and sustained AI recovery as separate resolution paths.
 
 | Scenario | Required result |
 | --- | --- |
@@ -459,10 +459,10 @@ The main story follows an older resident living alone. Show the dataset and a co
 | Guarded-gate feed is unavailable | Show the missing feed and exclude it from frequency comparisons; do not record zero gate use |
 | Away mode is active or it is outside the expected active period | Do not create a new inactivity incident |
 | Model and notification pipeline replay | Match dataset, feature window, model, incident and notification IDs across dashboard and iOS |
-| Family alert is created | Family receives the first app pop-up; do not notify the resident before the family stage |
-| No family response for five minutes | Notify the resident at t0+5 minutes, once |
-| Neither family nor resident responds for another five minutes | Notify township at t0+10 minutes, once |
-| Family acknowledges responsibility before a later stage | Stop unsent unanswered stages; retain ownership and open follow-up until an outcome |
+| Resident check-in is created | Resident receives the first app pop-up; do not notify family before the resident stage |
+| No resident response for five minutes | Notify family at t0+5 minutes, once |
+| Neither resident nor family responds for another five minutes | Notify township at t0+10 minutes, once |
+| Family acknowledges responsibility before the township stage | Stop the unsent township stage; retain ownership and open follow-up until an outcome |
 | Resident requests contact/help | Record a response and action owner; keep follow-up visible and block AI closure until addressed |
 | Family or township responds late | Preserve one incident and explicit ownership/handoff |
 | One activity signal resumes during an open incident | Show accumulating recovery evidence; do not close from that event alone |
@@ -482,7 +482,7 @@ Verify the five- and ten-minute deadlines against stored server times, including
 
 ### Prototype completion
 
-Prototype completion means the iOS and web journeys work end to end, dataset splits are inspectable, one model is actually trained and evaluated, and its inference produces the family → resident → township sequence at t0 / +5 / +10 when unanswered. Family outcomes, resident confirmation and sustained AI recovery close with distinct actors and remain consistent across views. Recovery settings are selected on validation and versioned. These are delivery criteria, not measured resident outcomes.
+Prototype completion means the iOS and web journeys work end to end, dataset splits are inspectable, one model is actually trained and evaluated, and its inference produces the resident → family → township sequence at t0 / +5 / +10 when unanswered. Family outcomes, resident confirmation and sustained AI recovery close with distinct actors and remain consistent across views. Recovery settings are selected on validation and versioned. These are delivery criteria, not measured resident outcomes.
 
 ## Parties involved and responsibilities
 
@@ -492,8 +492,8 @@ The proposal envisages SDP as platform sponsor, the selected family contact as t
 | --- | --- | --- | --- |
 | Sime Darby Property | Proposed platform sponsor and pilot funder; agree integration and operating responsibilities | Potential post-handover engagement and community wellbeing evidence | Hackathon sponsor; delivery commitments to confirm |
 | Resident (monitored) | Gives consent, selects contacts, sets away mode and can confirm wellbeing | Human support while retaining control | Simulated role; pilot recruitment proposed |
-| Family contact | Receives the first alert, acknowledges responsibility and records follow-up | Clear status and fewer duplicate responses | Simulated role; real availability and payment unconfirmed |
-| Authorised township responder | Accepts unanswered incidents at ten minutes, after family and resident stages; records outcome or handoff | A shared follow-up protocol | Simulated role; staffing and mandate to confirm |
+| Family contact | Receives an alert after an unanswered resident check-in, acknowledges responsibility and records follow-up | Clear status and fewer duplicate responses | Simulated role; real availability and payment unconfirmed |
+| Authorised township responder | Accepts unanswered incidents at ten minutes, after resident and family stages; records outcome or handoff | A shared follow-up protocol | Simulated role; staffing and mandate to confirm |
 | Residents' association or management body (JMB/MC) | Agree any use of systems they operate and a responder arrangement | Potential wellbeing service for members | To confirm per township |
 | Parking and mall operators | Potential minimal linked context feeds, subject to permission and reliable identity linkage | Potential resident-service partnership | No connection or agreement established |
 | Air Selangor | Potential consented interval water data | Possible resident-service partnership | Not yet approached; no committed phase |
@@ -512,11 +512,11 @@ For review: approximately 3 months in one guarded SDP precinct, with 30–50 opt
 | --- | --- | --- | --- |
 | 0. Setup | Weeks 1–3 | Confirm funding, permissions, minimal feeds, participant consent, accepted contacts and responder responsibilities | At least 30 participating households and all prerequisites met; otherwise defer |
 | 1. Shadow mode | Weeks 4–5 | Collect real baseline evidence; review candidate alerts without sending them | Review data quality, unnecessary alerts and whether a two-week baseline is sufficient |
-| 2. Supervised response drills | Weeks 6–9 | Exercise the family-first workflow, acknowledgement deadline, township escalation and explicit outcomes with consented drill participants | Delivery, response ownership and staffing demonstrated before live service |
+| 2. Supervised response drills | Weeks 6–9 | Exercise the resident-first workflow, acknowledgement deadline, township escalation and explicit outcomes with consented drill participants | Delivery, response ownership and staffing demonstrated before live service |
 | 3. Conditional live service | Weeks 10–12 | Enable the agreed workflow only if ready; survey residents and families | Pilot measures and participant feedback recorded; otherwise remain in supervised evaluation |
 | Decision | Week 13 | Report to SDP: expand, adjust or stop | Proposed gate criteria below plus continued operational feasibility |
 
-The prototype uses family at t0, resident at five unanswered minutes and township at ten unanswered minutes, with sustained AI-recovery closure. Validate that sequence and recovery settings with participants and the operator before live alerts. Any revised field policy must be explicit; never promise township follow-up without staffing.
+The prototype uses the resident check-in at t0, family at five unanswered minutes and township at ten unanswered minutes, with sustained AI-recovery closure. Validate that sequence and recovery settings with participants and the operator before live alerts. Any revised field policy must be explicit; never promise township follow-up without staffing.
 
 **Proposed gate to expand, for your review:**
 
@@ -606,11 +606,11 @@ The main feasibility risks are useful real data, reliable identity linkage and a
 | Useful electricity or water feeds unavailable or late | The current model/policy lacks required evidence | Establish software feeds and latency before a pilot; show insufficient data rather than zero; no hardware fallback |
 | Parking, mall or gate access unavailable | Context is incomplete | Confirm operators and permissions; show missing context explicitly |
 | Shared cards or household activity attributed to a person | Wrong suppression or misleading explanation | Explicit identity scope, movement deduplication and no claim of individual safety from household data |
-| Too many unnecessary alerts | Families lose trust and opt out | Validate baselines and thresholds in shadow mode; away mode; measure the burden of family-first alerts |
+| Too many unnecessary alerts | Families lose trust and opt out | Validate baselines and thresholds in shadow mode; away mode; measure the burden of family alerts |
 | Resident has limited app access | Setup, confirmation or withdrawal is difficult | Large accessible controls; evaluate assisted onboarding and fallback separately without transferring consent |
 | Low opt-in because of privacy worries | Pilot too small or unrepresentative | Plain-language consent and limited incident sharing; obtain resident feedback |
 | Missed concern or notification failure | Delayed follow-up and loss of trust | Visible delivery failures, recorded outcomes, participant reporting, reviewed limits and supervised drills |
-| Township responder lacks capacity | Ten-minute escalation is offered without reliable follow-up | Confirm staffing, drills and the family/resident 5+5-minute sequence before live service |
+| Township responder lacks capacity | Ten-minute escalation is offered without reliable follow-up | Confirm staffing, drills and the resident/family 5+5-minute sequence before live service |
 | Synthetic scenarios or labels leak into features | Unrealistically strong evaluation and poor generalisation | Separate households/time, fit transforms on training only, keep test untouched and exclude scenario metadata |
 | AI closes while a concern remains | Follow-up is interrupted or a human task disappears | Sustained independent evidence, resident attribution, validation of false closures, notification and explicit township-action disposition |
 | Routine changes cause drift | More missed or unnecessary alerts | Inspect coverage and feature/alert trends; reviewed retraining with versioned data and rollback |
