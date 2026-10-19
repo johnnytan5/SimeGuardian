@@ -1,6 +1,6 @@
 # SimeGuardian
 
-An opt-in wellbeing check for Sime Darby Property township residents who are often home alone. Township signals (car plate recognition, access cards, SDP app activity, a water flow sensor in the pilot) tell the system whether a resident is home and recently active. If an unexplained silence goes on too long, it escalates step by step: an in-app check-in, then the family contact, then a security welfare check.
+An opt-in wellbeing check for Sime Darby Property township residents who are often home alone. Township signals (car plate recognition, access cards, SDP app activity, a water flow sensor in the pilot) tell the system whether a resident is home and recently active. If an unexplained silence goes on too long, it escalates step by step: an in-app check-in to the resident, then the family contact after five unanswered minutes, then a township welfare check after another five.
 
 Built for the Sime Darby Property University Hackathon 2026 (Township of Tomorrow).
 
@@ -64,6 +64,8 @@ ml/.venv/bin/python -m unittest discover ml
 
 ## Docs
 
-- [Business Requirements Document](docs/BRD.md)
+- [Business and Product Requirements](docs/REQUIREMENTS.md)
+- [Design](docs/DESIGN.md)
+- [Web dashboard implementation plan](docs/IMPLEMENTATION_PLAN.md) and [mobile implementation plan](docs/MOBILE_IMPLEMENTATION_PLAN.md) (written for native/Flutter clients; this branch uses Expo Go)
 - [Demo design](docs/superpowers/specs/2026-10-19-simeguardian-demo-design.md)
 - [Implementation plan](docs/superpowers/plans/2026-10-19-simeguardian-demo.md)
