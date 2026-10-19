@@ -7,3 +7,6 @@ __pycache__/
 .venv/
 dist/
 build/
+
+# ML run artifacts (re-create with ml/train.py); latest.json is kept for the dashboard
+ml/runs/*/
