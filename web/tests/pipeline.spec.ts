@@ -51,6 +51,7 @@ test("pipeline animates all signals, pauses, resumes and supports selection and 
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto("/pipeline");
+  await page.getByRole("button", { name: "Exit fullscreen map" }).click();
   await expect(page.getByRole("heading", { name: "Daily signal flow" })).toBeVisible();
   await expect(page.locator(".signal-readings .source-card")).toHaveCount(6);
   await expect(page.locator(".signal-chart .recharts-area-curve")).toHaveCount(6);
@@ -58,7 +59,7 @@ test("pipeline animates all signals, pauses, resumes and supports selection and 
     "electricity ratio", "water ratio", "gate frequency ratio", "resident interactions",
   ]);
 
-  const clock = page.getByLabel("Simulation time");
+  const clock = page.getByLabel("Simulation time", { exact: true });
   const firstTime = await clock.getAttribute("datetime");
   await expect.poll(() => clock.getAttribute("datetime")).not.toBe(firstTime);
   await page.getByRole("button", { name: "Pause simulation" }).click();
@@ -98,9 +99,10 @@ test("reduced motion starts paused and missing replay inputs stay missing", asyn
     await route.fulfill({ response, json: data });
   });
   await page.goto("/pipeline");
+  await page.getByRole("button", { name: "Exit fullscreen map" }).click();
   await expect(page.getByRole("button", { name: "Resume simulation" })).toBeVisible();
   await expect(page.locator(".signal-features > div").filter({ hasText: "water ratio" })).toContainText("Missing");
-  const clock = page.getByLabel("Simulation time");
+  const clock = page.getByLabel("Simulation time", { exact: true });
   const initial = await clock.getAttribute("datetime");
   await page.waitForTimeout(1200);
   expect(await clock.getAttribute("datetime")).toBe(initial);
@@ -113,6 +115,7 @@ test("management can change range and signal, compare homes and drill into a rou
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto("/pipeline");
+  await page.getByRole("button", { name: "Exit fullscreen map" }).click();
   await page.getByRole("button", { name: "Pause simulation" }).click();
   await expect(page.getByRole("heading", { name: "Township usage overview" })).toBeVisible();
   await expect(page.getByRole("button", { name: "7 days", exact: true })).toHaveAttribute("aria-pressed", "true");

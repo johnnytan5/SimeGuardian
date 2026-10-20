@@ -46,19 +46,20 @@ test("anomaly walkthrough animates, pauses, flags the selected home and clears w
   });
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto("/pipeline");
+  await page.getByRole("button", { name: "Exit fullscreen map" }).click();
   await page.getByLabel("Household", { exact: true }).selectOption("SG-012");
   await page.getByRole("button", { name: "Run anomaly demo", exact: true }).click();
-  await expect(page.getByRole("button", { name: "Demo in progress" })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Demo in progress", exact: true })).toBeDisabled();
   await expect(page.locator(".anomaly-demo")).toHaveClass(/animating/);
   await expect(page.getByRole("heading", { name: "Normal routine", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "24 hours", exact: true })).toHaveAttribute("aria-pressed", "true");
   await expect(page.getByRole("heading", { name: "Usage drops", exact: true })).toBeVisible({ timeout: 6000 });
   await page.getByRole("button", { name: "Pause demo", exact: true }).click();
-  const pausedTime = await page.getByLabel("Simulation time").getAttribute("datetime");
+  const pausedTime = await page.getByLabel("Simulation time", { exact: true }).getAttribute("datetime");
   const pausedCurve = await page.locator(".anomaly-chart .recharts-area-curve").getAttribute("d");
   await page.waitForTimeout(1200);
   await expect(page.getByRole("heading", { name: "Demo paused" })).toBeVisible();
-  expect(await page.getByLabel("Simulation time").getAttribute("datetime")).toBe(pausedTime);
+  expect(await page.getByLabel("Simulation time", { exact: true }).getAttribute("datetime")).toBe(pausedTime);
   expect(await page.locator(".anomaly-chart .recharts-area-curve").getAttribute("d")).toBe(pausedCurve);
   await expect(page.locator(".anomaly-demo")).not.toHaveClass(/animating/);
   await page.getByRole("button", { name: "Continue demo", exact: true }).click();
@@ -88,6 +89,7 @@ test("anomaly walkthrough animates, pauses, flags the selected home and clears w
 test("reduced-motion demo advances without effects and switching homes cancels it", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/pipeline");
+  await page.getByRole("button", { name: "Exit fullscreen map" }).click();
   await page.getByRole("button", { name: "Run anomaly demo", exact: true }).click();
   await expect(page.locator(".anomaly-demo")).not.toHaveClass(/animating/);
   await expect(page.getByRole("heading", { name: "Demo anomaly detected", exact: true })).toBeVisible({ timeout: 15000 });

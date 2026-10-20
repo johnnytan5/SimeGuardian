@@ -34,6 +34,7 @@ test("main routes and dataset drill-down survive direct navigation and refresh",
   ];
   for (const [path, title] of pages) {
     await page.goto(path);
+    if (path === "/pipeline") await page.getByRole("button", { name: "Exit fullscreen map" }).click();
     await expect(
       page.getByRole("heading", { name: title, exact: true }),
     ).toBeVisible();
@@ -188,6 +189,7 @@ test("workspace API failure can be retried without a broken shell", async ({
   );
   await page.unroute("**/api/workspace");
   await page.getByRole("button", { name: "Retry", exact: true }).click();
+  await page.getByRole("button", { name: "Exit fullscreen map" }).click();
   await expect(
     page.getByRole("heading", { name: "Signal pipeline" }),
   ).toBeVisible();
@@ -228,6 +230,7 @@ test("operations pages stay usable on compact screens", async ({ page }) => {
     "/demo",
   ]) {
     await page.goto(path);
+    if (path === "/pipeline") await page.getByRole("button", { name: "Exit fullscreen map" }).click();
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     expect(
       await page.evaluate(

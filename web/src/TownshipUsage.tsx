@@ -1,7 +1,8 @@
 import { useState, type CSSProperties } from "react";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Badge } from "./ui";
-import { formatSignal, townshipRanges, type AnomalyDemoState, type TownshipRange, type townshipWindow } from "./signalSimulation";
+import { TownshipExplorer } from "./TownshipExplorer";
+import { formatSignal, townshipRanges, usageBand, type AnomalyDemoState, type TownshipRange, type townshipWindow } from "./signalSimulation";
 
 const hourFormat = new Intl.DateTimeFormat("en-MY", {
   hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "Asia/Kuala_Lumpur",
@@ -15,7 +16,7 @@ const stampFormat = new Intl.DateTimeFormat("en-MY", {
 
 export function TownshipUsage({
   window, range, onRange, sources, signal, onSignal, household, onHousehold,
-  paused, onPause, reducedMotion, anomaly,
+  paused, onPause, reducedMotion, anomaly, demo, onStartDemo, onClearDemo,
 }: {
   window: ReturnType<typeof townshipWindow>;
   range: TownshipRange;
@@ -29,6 +30,9 @@ export function TownshipUsage({
   onPause: () => void;
   reducedMotion: boolean;
   anomaly: AnomalyDemoState | null;
+  demo: AnomalyDemoState | null;
+  onStartDemo: () => void;
+  onClearDemo: () => void;
 }) {
   const [search, setSearch] = useState("");
   const { homes, totals } = window;
@@ -43,6 +47,12 @@ export function TownshipUsage({
 
   return (
     <>
+      <TownshipExplorer
+        window={window} range={range} onRange={onRange} signal={signal}
+        onSignal={onSignal} household={household} onHousehold={onHousehold}
+        paused={paused} anomaly={anomaly} onPause={onPause}
+        demo={demo} onStartDemo={onStartDemo} onClearDemo={onClearDemo}
+      />
       <section className="panel township-panel" aria-labelledby="township-title">
         <div className="panel-heading">
           <div>
@@ -111,9 +121,13 @@ export function TownshipUsage({
           <label className="search"><input aria-label="Find a household pattern" placeholder="Find a home or routine…" value={search} onChange={(event) => setSearch(event.target.value)} /></label>
         </div>
         <div className="heatmap-key">
-          <span>Less activity</span>
-          {[0, 1, 2, 3, 4].map((level) => <i key={level} className={`heat-level-${level}`} aria-hidden="true" />)}
-          <span>More activity</span><span>{anomaly ? "Coral = affected demo window · purple = relative usage" : "1× = this home’s average · colour indicates usage, not risk"}</span>
+          <div className="heatmap-scale">
+            <div className="heatmap-gradient" aria-hidden="true" />
+            <div className="heatmap-scale-labels">
+              {["<0.5×", "0.5–1×", "1–1.5×", "1.5–2×", "≥2×"].map((band) => <span key={band}>{band}</span>)}
+            </div>
+          </div>
+          <span>{anomaly ? "Outlined + striped cells = demo concern · 1× = home’s average" : "Blue → red: low → high usage · 1× = home’s average"}</span>
         </div>
         <div className="household-heatmap" role="region" aria-label="Household usage heatmap" tabIndex={0}>
           <div className="heatmap-grid" style={{ "--bins": totals.length } as CSSProperties}>
@@ -136,7 +150,7 @@ export function TownshipUsage({
                   <span className="heatmap-home"><strong>{home.id}</strong><small>{anomaly?.household === home.id ? "Demo anomaly detected" : home.profile.name}</small></span>
                   {home.points.map((point, index) => {
                     const ratio = average ? point[signal] / average : 0;
-                    return <span key={index} className={`heatmap-cell heat-level-${Math.min(4, Math.floor(ratio * 2))} ${anomaly?.household === home.id && point.at >= anomaly.from ? "heatmap-anomaly" : ""}`} title={`${home.id} · ${stampFormat.format(point.at - bucketHours * 3_600_000)} — ${stampFormat.format(point.at)} MYT · ${formatSignal(signal, point[signal])} ${unit} · ${ratio.toFixed(1)}× this home's average`} />;
+                    return <span key={index} className={`heatmap-cell heat-level-${usageBand(point[signal], average)} ${anomaly?.household === home.id && point.at >= anomaly.from ? "heatmap-anomaly" : ""}`} title={`${home.id} · ${stampFormat.format(point.at - bucketHours * 3_600_000)} — ${stampFormat.format(point.at)} MYT · ${formatSignal(signal, point[signal])} ${unit} · ${ratio.toFixed(1)}× this home's average`} />;
                   })}
                   <span className="heatmap-total">{formatSignal(signal, sum)}<small>{unit}</small></span>
                 </button>

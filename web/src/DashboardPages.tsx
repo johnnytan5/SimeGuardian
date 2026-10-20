@@ -806,6 +806,9 @@ function Pipeline({ data }: PageProps) {
         onPause={() => setPaused((current) => !current)}
         reducedMotion={reducedMotion}
         anomaly={detected ? demo : null}
+        demo={demo}
+        onStartDemo={startDemo}
+        onClearDemo={() => setDemo(null)}
       />
       <div id="household-signals" className="household-anchor">
       <Panel

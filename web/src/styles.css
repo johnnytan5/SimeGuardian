@@ -2036,7 +2036,8 @@ textarea:focus-visible {
   color: #a74450;
 }
 .heatmap-cell.heatmap-anomaly {
-  background: #df7c89;
+  box-shadow: inset 0 0 0 2px #402d51;
+  background-image: repeating-linear-gradient(135deg, transparent 0 5px, #ffffff88 5px 7px);
 }
 @keyframes anomaly-scan {
   from { left: 12%; opacity: 0; }
@@ -2152,12 +2153,23 @@ textarea:focus-visible {
   font-size: 10px;
   color: #756a84;
 }
-.heatmap-key i {
-  width: 18px;
-  height: 10px;
-  border-radius: 2px;
+.heatmap-scale {
+  width: 320px;
+  max-width: 100%;
 }
-.heatmap-key span:last-child {
+.heatmap-gradient {
+  height: 10px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #4f6de0 10%, #35b7cf 30%, #64bf8a 50%, #f0bf54 70%, #e66b67 90%);
+}
+.heatmap-scale-labels {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  margin-top: 6px;
+  text-align: center;
+  white-space: nowrap;
+}
+.heatmap-key > span:last-child {
   margin-left: auto;
 }
 .household-heatmap {
@@ -2222,11 +2234,11 @@ button.heatmap-row:hover,
   height: 25px;
   border-radius: 3px;
 }
-.heat-level-0 { background: #f2edf8; }
-.heat-level-1 { background: #e2d2f5; }
-.heat-level-2 { background: #c2a0e9; }
-.heat-level-3 { background: #a276d6; }
-.heat-level-4 { background: #7950b7; }
+.heat-level-0 { background-color: #4f6de0; }
+.heat-level-1 { background-color: #35b7cf; }
+.heat-level-2 { background-color: #64bf8a; }
+.heat-level-3 { background-color: #f0bf54; }
+.heat-level-4 { background-color: #e66b67; }
 .heatmap-total {
   text-align: right;
   font-size: 11px;
@@ -2919,7 +2931,7 @@ select {
     margin-left: 0;
     margin-right: 0;
   }
-  .heatmap-key span:last-child {
+  .heatmap-key > span:last-child {
     flex-basis: 100%;
     margin: 5px 0 0;
   }

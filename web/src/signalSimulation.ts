@@ -21,6 +21,18 @@ export type TownshipRange = keyof typeof townshipRanges;
 export type SignalSample = Record<string, number> & { at: number };
 export type AnomalyDemoState = { household: string; from: number; step: number };
 
+export const usageColors = ["#4f6de0", "#35b7cf", "#64bf8a", "#f0bf54", "#e66b67"];
+export const usageBand = (value: number, average: number) =>
+  average > 0 ? Math.min(4, Math.max(0, Math.floor(value / average * 2))) : 0;
+
+export function usagePattern(points: SignalSample[], utility: "electricity" | "water") {
+  const values = points.map((point) => point[utility]);
+  const total = values.reduce((sum, value) => sum + value, 0);
+  const average = values.length ? total / values.length : 0;
+  const latest = values.at(-1) ?? null;
+  return { total, average, latest, band: usageBand(latest ?? 0, average), bands: values.map((value) => usageBand(value, average)) };
+}
+
 const routines = [
   { name: "Early routine", morning: 6.2, evening: 17.5, daytime: 0.2 },
   { name: "Daytime activity", morning: 8, evening: 19, daytime: 0.65 },
