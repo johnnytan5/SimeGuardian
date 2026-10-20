@@ -1,20 +1,22 @@
 # SimeGuardian — Web Dashboard Implementation Plan
 
-18 October 2026 · Version 0.1 · Proposed implementation, not completed work
+19 October 2026 · Version 0.4 · Main web UI and local model-to-response replay implemented
 
 Contents: [Purpose](#1-purpose-and-completion-criteria) · [Stack](#2-technology-stack) · [Architecture](#3-architecture-and-boundaries) · [Phase map](#4-phase-map) · [Detailed phases](#5-detailed-phases) · [Acceptance](#6-acceptance-and-verification-matrix) · [Milestones](#7-demonstration-and-delivery-milestones) · [Change impact](#8-change-impact-and-implementation-discipline) · [Limits](#9-deferred-work-and-known-limits) · [References](#10-technical-references)
 
 ## 1. Purpose and completion criteria
 
-Build the web MLOps dashboard and the shared services needed to demonstrate a real synthetic-data → trained-model → incident → Flutter pop-up journey. The dashboard must let an operator inspect evidence, run experiments, select a model and trace every notification and response.
+Build the web MLOps dashboard and the shared services needed to demonstrate a real synthetic-data → trained-model → incident → iOS pop-up journey. The dashboard must let an operator inspect evidence, run experiments, select a model and trace every notification and response.
 
-This plan expands the recommended stack into executable phases. All implementation checkboxes start unchecked. No application, dataset, model, deployment or test result is claimed to exist.
+This plan expands the selected stack into executable phases. The [local MLflow prototype](MLFLOW.md) logs real synthetic runs/models. The main React/FastAPI UI now covers the screen inventory, including dataset/source exploration, training/evaluation/registry, actual champion inference on explicit synthetic windows, a persisted incident/escalation replay, operations, demo controls and a server-scoped responder identity. The [dashboard runbook](DASHBOARD.md) identifies implemented behaviour and limits. The source explorer remains separate from model feature generation; native iOS delivery, production identities, complete incident policies and episode evaluation are pending. Phase checkboxes remain unchecked until their complete integration gates pass.
 
 Source documents:
 
 - [Business and Product Requirements](REQUIREMENTS.md): authoritative product behaviour, required screens and acceptance scenarios.
 - [Homepage Design Specification](DESIGN.md): visual reference for brand colours, typography and shapes. Its public-homepage sections and promotional interactions are outside dashboard scope.
 - [Project overview](../README.md): summary and documentation entry point.
+- [MLflow prototype](MLFLOW.md): runnable tracking/registry setup, evidence and integration boundaries.
+- [Native iPhone plan](MOBILE_IMPLEMENTATION_PLAN.md): current Swift/SwiftUI client selection and mobile contracts.
 
 If this plan conflicts with the requirements, preserve the requirements and update this plan. Dataset sizes and experimental thresholds below remain proposed defaults until recorded in versioned configuration and evaluated. The requirements mention both a 23 October proposal deadline and a prototype target; distinguish these when assigning delivery dates in Phase 0.
 
@@ -22,12 +24,13 @@ The prototype is complete when:
 
 1. Six synthetic source groups pass through validation, causal features and actual trained-model inference.
 2. Dataset versions, household/time splits, training runs, evaluation and model activation/rollback are inspectable.
-3. A backend-generated incident produces a real foreground Flutter family pop-up with matching incident and notification identifiers.
+3. A backend-generated incident produces a real foreground iOS family pop-up with matching incident and notification identifiers.
 4. Unanswered alerts progress to resident at +5 minutes and township at +10 minutes, with persisted deadlines and idempotent transitions.
 5. Family acknowledgement, completed human outcomes, resident help requests and sustained AI recovery have distinct recorded behaviour.
 6. Missing data, away mode, consent and withdrawal rules apply consistently to inference, delivery and every role view.
-7. Dashboard, Flutter and worker remain consistent after refresh, reconnect, retry and process restart.
+7. Dashboard, iOS and worker remain consistent after refresh, reconnect, retry and process restart.
 8. All required acceptance scenarios in the requirements have a passing check or an explicitly unresolved failure; an unresolved required failure means the prototype is incomplete.
+9. MLflow records an initial model and at least one genuine retraining round, with predecessor/data lineage, comparable validation results and explicit promotion/rejection history. Evolution is demonstrated by real changes; improvement is claimed only where measured results support it.
 
 ## 2. Technology stack
 
@@ -37,22 +40,23 @@ These are implementation recommendations for this prototype. Resolve compatible 
 | --- | --- | --- |
 | Dashboard | React + TypeScript + Vite | Client-rendered operator application; Vite creates the static production bundle |
 | Routing | React Router | Required views, incident deep links and refreshable URLs |
-| Styling and controls | Tailwind CSS + shadcn/ui | Shared layout, tables, forms, dialogs and accessible interaction primitives; add only components actually used |
+| Styling and controls | CSS + semantic React/platform controls | Current workspace uses shared styles, labelled forms and native dialogs; no existing house component library needs to be duplicated |
 | Charts | Recharts | Utility/feature timelines, coverage distributions, evaluation and operational charts |
 | Backend | Python + FastAPI + Pydantic + Uvicorn | Validated REST API, authentication, scoped event stream, policy and response actions |
 | Persistence | PostgreSQL + SQLAlchemy + Alembic + psycopg | Shared operational state, source/feature records, constraints and schema migrations |
 | Data and ML | pandas + NumPy + scikit-learn | Reproducible generation, causal baselines/features, Isolation Forest and evaluation |
-| Artifact storage | Persistent filesystem volume + joblib/JSON/CSV | Internally generated model files, manifests and reports, with immutable checksums and database references |
+| Experiment tracking and registry | MLflow Tracking + Model Registry | Runs, parameters/metrics, dataset lineage, registered versions, candidate/champion aliases and comparison UI |
+| Artifact storage | MLflow-managed persistent volume; sklearn model flavor + JSON/CSV | Versioned models, input signatures, environments, manifests and reports; references in application records |
 | Background execution | Python worker + separate training process | Persisted jobs and workflow deadlines; CPU training must not block escalation or withdrawal checks |
 | Delivery | REST + authenticated WebSockets | Reads/actions plus foreground events; persisted fetch/replay restores state after reconnect |
 | Demo authentication | Seeded accounts + PyJWT + pwdlib/Argon2 | Short-lived bearer tokens using FastAPI's documented pattern; enforce role, household and assignment access on the server |
-| Resident/family client | Flutter | Required app pop-ups, deep links, setup, response actions and sharing controls |
-| Verification | pytest, Vitest, Playwright, Flutter test tools | Domain/database checks, focused UI tests, browser journeys and client delivery tests |
-| Local packaging | Docker Compose + npm + Python virtual environment | Reproducible database/API/worker setup; native Flutter tooling runs separately |
+| Resident/family client | Swift + SwiftUI in Xcode | Required app pop-ups, deep links, setup, response actions and sharing controls |
+| Verification | pytest, Vitest, Playwright, XCTest/XCUITest | Domain/database checks, focused UI tests, browser journeys and client delivery tests |
+| Local packaging | Docker Compose + npm + Python virtual environment | Reproducible database/API/worker setup; native Xcode tooling runs separately |
 
-React owns presentation; FastAPI owns model execution and workflow decisions. PostgreSQL is the shared source of truth. The dashboard may use component state and a small typed API client initially; introduce a client-state library only if concrete caching or coordination needs justify it.
+React owns presentation; FastAPI owns model execution and workflow decisions. Application PostgreSQL owns operational state; MLflow owns experiments and registered artifacts, backed by a separate database/user in the same PostgreSQL instance. The runnable local smoke uses SQLite as described in its runbook. The dashboard may use component state and a small typed API client initially; introduce a client-state library only if concrete caching or coordination needs justify it.
 
-The first deployment shape is a single API instance, one workflow worker, a separate training process and one PostgreSQL instance. The API can serve the built dashboard from the same origin. Persist database and artifact volumes. Keep an API URL configurable for the Flutter emulator or device; a phone cannot reach the development computer through the phone's own `localhost`.
+The first integrated deployment shape is a single API instance, one workflow worker, a separate training process, an MLflow tracking service and one PostgreSQL instance with separate application/MLflow databases. The API can serve the built dashboard from the same origin. Persist both databases and MLflow artifact volumes. Keep an API URL configurable for the iOS simulator or device; a phone cannot reach the development computer through the phone's own `localhost`.
 
 This single-instance design is a prototype limit. Record a `shortcut:` comment near the process-local connection manager if used; upgrade to shared event fan-out when multiple API instances are required. Persisted notification records, rather than the connection manager, determine delivery history.
 
@@ -63,16 +67,18 @@ flowchart LR
     S[Six synthetic source groups] --> V[Validation and deduplication]
     V --> F[Past-only features and baselines]
     F --> T[Training and validation]
-    T --> M[Versioned model artifact]
+    T --> ML[MLflow Tracking and Registry]
+    ML --> M[Numeric registered model version]
     F --> I[Inference and shared policy]
     M --> I
     I --> DB[(PostgreSQL)]
     J[Workflow worker] <--> DB
     A[FastAPI] <--> DB
     A <--> W[React dashboard]
-    A <--> C[Flutter clients]
-    T --> FS[Persistent artifacts]
-    A --> FS
+    A <--> C[iOS clients]
+    ML --> MDB[(MLflow metadata database)]
+    ML --> FS[Persistent MLflow artifacts]
+    A <--> ML
 ```
 
 ### 3.1 Invariants shared by every phase
@@ -88,7 +94,7 @@ flowchart LR
 - Commit workflow transitions and their notification records atomically. Dispatch after commit; retry the same logical event rather than creating duplicate alerts.
 - Recheck consent, sharing permission, current responses and incident state immediately before a monitoring decision or notification dispatch.
 - Keep data-source availability independent from incident status. Missing, delayed or failed data never becomes zero usage or an automated claim of personal safety.
-- Every inference links dataset, feature window, model and policy versions. Every participant action links the authenticated actor, incident, action and server timestamp.
+- Every inference links dataset, feature window, MLflow run ID, registered model name/numeric version and policy version. Resolve an alias once during activation; never let an alias change silently alter an incident's evidence. Every participant action links the authenticated actor, incident, action and server timestamp.
 - Operator evidence is restricted to synthetic/demo data. Family and township responses expose only permitted incident details; hiding a page in the sidebar is insufficient access control.
 
 ### 3.2 Proposed repository structure
@@ -112,17 +118,17 @@ SimeGuardian/
 │   │   ├── schemas.py         # Request, response and event contracts
 │   │   ├── auth.py            # Seeded account authentication and authorisation
 │   │   ├── clock.py           # Shared real/simulated time calculation
-│   │   ├── pipeline/          # Generation, ingestion, features, training and evaluation
+│   │   ├── pipeline/          # MLflow smoke runner now; full generation/features/training/evaluation later
 │   │   ├── policy.py          # Coverage, conflict, away and recovery decisions
 │   │   ├── incidents.py       # Ownership, transitions, outcomes and handoffs
 │   │   ├── notifications.py   # Durable events, attempts and scoped delivery
 │   │   └── worker.py          # Due work and training-process coordination
 │   ├── migrations/            # Alembic schema history
 │   └── tests/                 # Domain, API, database and restart checks
-├── mobile/                    # Flutter app and focused client tests
+├── mobile/                    # Native iOS app and focused client tests
 ├── tests/e2e/                 # Browser journeys using the real API and test database
-├── artifacts/                 # Generated local files; ignored by Git
-├── compose.yaml               # API, worker, database and persistent volumes
+├── artifacts/                 # Local MLflow database/artifacts and generated files; ignored by Git
+├── compose.yaml               # Planned API, worker, MLflow, databases and volumes
 ├── .env.example               # Placeholder configuration; no credentials
 └── docs/
     ├── REQUIREMENTS.md
@@ -130,7 +136,7 @@ SimeGuardian/
     └── IMPLEMENTATION_PLAN.md
 ```
 
-Keep shared logic inside the Python application. Avoid creating a generic framework, multiple backend services or a second implementation of policy in TypeScript/Dart.
+Keep shared logic inside the Python application. Avoid creating a generic framework, multiple backend services or a second implementation of policy in TypeScript/Swift.
 
 ### 3.3 Minimum persisted records
 
@@ -141,8 +147,8 @@ Keep shared logic inside the Python application. Avoid creating a generic framew
 | Dataset versions and split membership | Seed, generator/configuration version, checksum, household/date partitions and excluded episodes |
 | Source observations and source status | Source group, household/person scope, event/available times, interval/unit/value, trip/passage linkage, missingness and feed errors |
 | Feature windows and scenario labels | Versioned causal inputs; labels stored separately and excluded from inference queries |
-| Training runs and model versions | Actual job state, configuration, logs, artifact checksum, validation metrics, frozen thresholds and activation history |
-| Evaluation reports | Rule/model/combined episode counts, denominators, latency, false alerts, recovery results and untouched-test use |
+| Application training jobs and serving references | Durable job state plus MLflow experiment/run/model identifiers; active numeric version, frozen policy and activation audit; do not recreate MLflow's registry schema |
+| MLflow experiments, model versions and evaluation artifacts | Parameters, dataset/code/environment lineage, actual metrics/logs, artifacts and aliases; episode reports include counts, denominators, delays, coverage, recovery and untouched-test use |
 | Inference decisions | Feature window, scores, reason codes, coverage/conflicts, all version references and resulting incident link |
 | Incidents, incident events and response tasks | State, owner, episode linkage, outcomes, accepted township work and explicit handoffs/cancellation acknowledgement |
 | Notifications and delivery attempts | Stable event ID, recipient/stage, payload scope, creation/dispatch/receipt/open status, failure/retry and human response links |
@@ -152,15 +158,15 @@ Use foreign keys and uniqueness constraints for identity and duplicate preventio
 
 ### 3.4 API and event contracts
 
-The route names below are proposed boundaries. Freeze their request/response examples in Phase 0 and keep FastAPI OpenAPI, TypeScript types, Dart parsing and fixtures aligned when contracts change.
+The route names below are proposed boundaries. Freeze their request/response examples in Phase 0 and keep FastAPI OpenAPI, TypeScript types, Swift Codable parsing and fixtures aligned when contracts change.
 
 | API group | Suggested endpoints | Access |
 | --- | --- | --- |
 | Session | `POST /api/auth/token`, `GET /api/me`, `POST /api/events/ticket` | Seeded authenticated users; event ticket is short-lived and single-use |
 | Pipeline | `GET /api/pipeline`, `GET /api/sources` | Operator; participants receive their own reduced source-status view |
 | Datasets | `POST /api/datasets`, `GET /api/datasets`, `GET /api/datasets/{id}`, observation/feature/split subresources | Operator; creation accepts a validated generator configuration |
-| Experiments | `POST /api/training-runs`, `GET /api/training-runs/{id}`, logs, `POST /api/evaluations` | Operator; validation and test requests have distinct rules |
-| Models | `GET /api/models`, `POST /api/models/{id}/activate`, `POST /api/models/{id}/rollback` | Operator; explicit version checks and audit events |
+| Experiments | `POST /api/training-runs`, `GET /api/training-runs/{id}`, logs, `POST /api/evaluations` | Operator; authorised API reads MLflow run results, with separate validation/test rules |
+| Models | `GET /api/models`, `POST /api/models/{id}/activate`, `POST /api/models/{id}/rollback` | Operator; MLflow numeric version references, compatibility/quality checks and application activation audit |
 | Inference | `GET /api/inferences`, `GET /api/inferences/{id}` | Operator evidence only |
 | Incidents | `GET /api/incidents`, `GET /api/incidents/{id}`, `POST /api/incidents/{id}/actions` | Household/assignment-scoped payloads and server-validated actions |
 | Notifications | `GET /api/notifications?after=...`, receipt/open actions, operator retry action | Own events; operators see authorised synthetic traces |
@@ -173,6 +179,20 @@ An event envelope includes `event_id`, event type, incident/reference ID, permit
 
 Use explicit delivery states: created, dispatch attempted/accepted, client received, opened, human acknowledged/responded, failed or unknown. An open or transport acknowledgement is not a human response. Exchange a short-lived event ticket over authenticated REST before connecting the browser WebSocket; avoid long-lived credentials in URLs or logs.
 
+### 3.5 MLflow integration and model-evolution evidence
+
+Use the MLflow SDK in the Python training process and MLflow's HTTP API behind operator-authorised FastAPI routes. The main dashboard contains training configuration, job outcomes, run comparison/evidence and registry promotion/rollback; operators do not need to leave SimeGuardian for MLflow's separate UI. Participant clients never receive MLflow credentials or raw artifacts.
+
+Each training attempt records dataset/split fingerprints, source-code revision or checksum, feature/policy versions, seed, parameters, environment, change reason, predecessor run/version, actual metrics and the sklearn model signature/artifact. Log domain episode/recovery metrics explicitly; estimator autologging cannot supply them. Retraining creates a new run and registered version even when it is rejected.
+
+Demonstrate two chronological training rounds: an initial normal-routine dataset and a new version including reviewed later normal history from training households only. Evaluate both against the same validation benchmark and disclose its fingerprint, eligibility and denominators. If either benchmark or evaluator changes, mark the runs non-comparable until both are evaluated under the same protocol. Never reuse the final test partition to create a continuing improvement curve.
+
+MLflow aliases `candidate` and `champion` provide convenient registry pointers. The application stores a resolved numeric version plus the complete feature/policy bundle as its serving configuration. Validate/download the candidate before atomically activating it, record an audit event, then reconcile the MLflow alias; the application database and MLflow cannot commit one distributed transaction. A failed promotion leaves the last-known-good artifact active. Existing incidents retain their original versions.
+
+Monitoring or reviewed feedback may prompt an operator to start retraining. No drift event automatically promotes a model; family responses are reviewed outcomes, not automatically training labels. Keep failed/regressing candidates visible and report unchanged or worse results honestly. The local runner implements model-only window checks; full episode-level promotion/recovery gates and application activation remain Phase 3/5 work.
+
+When MLflow is unavailable, new tracking/activation shows a visible failure and cannot claim success. The application may continue inference with its already validated loaded model. Operator monitoring, access controls, backup/restore of metadata plus artifacts, migration handling and alias reconciliation belong in the integrated setup.
+
 ## 4. Phase map
 
 Phases are completion gates, not fixed calendar promises. During Phase 0, assign a named owner to each phase and estimate dates from actual team availability. Existing work may begin against frozen fixtures, but dependent phases cannot pass their exit checks against mocked evidence.
@@ -182,8 +202,8 @@ Phases are completion gates, not fixed calendar promises. During Phase 0, assign
 | 0 | Scope, contracts and acceptance checklist | Existing requirements | All required FRs and non-functional rules |
 | 1 | Running shell, persistence, accounts and shared clock | 0 | FR-1 foundations; timing, access and accessibility |
 | 2 | Reproducible six-source dataset and inspectable pipeline | 1 | FR-2 foundations, FR-3, FR-11 data, FR-12 data views |
-| 3 | Actual baseline/model evaluation and versioned artifact | 2 | FR-2, FR-4, FR-11, FR-12 MLOps |
-| 4 | Trained inference to Flutter pop-up and 5+5-minute response | 1–3 | FR-5, FR-7 human workflow, FR-10 |
+| 3 | MLflow-tracked initial/retrained models, evaluation and versioned artifacts | 2 | FR-2, FR-4, FR-11, FR-12 MLOps |
+| 4 | Trained inference to iOS pop-up and 5+5-minute response | 1–3 | FR-5, FR-7 human workflow, FR-10 |
 | 5 | Complete operator dashboard and operational evidence | 2–4 | FR-12, model activation/rollback |
 | 6 | Sustained recovery, full participant controls and withdrawal | 3–5 | FR-1, FR-6, FR-7 recovery/handoffs |
 | 7 | Verified, reproducible demonstration and handover | 0–6 | Every required acceptance scenario |
@@ -200,7 +220,7 @@ FR-8 water/leak insight and FR-9 weekly summaries remain optional and are exclud
 
 **Implementation tasks:**
 
-- [ ] Assign accountable owners for web, shared backend/workflow, data/ML, Flutter and final integration; one person may own multiple areas.
+- [ ] Assign accountable owners for web, shared backend/workflow, data/ML, iOS and final integration; one person may own multiple areas.
 - [ ] Record the intended milestone dates and distinguish proposal submission from prototype completion. Estimate work from available people and completed gates.
 - [ ] Translate every row in the requirements' demonstration table into a named scenario with inputs, expected decisions and observable outcomes.
 - [ ] Freeze examples for source observations, feature windows, model decisions, incidents, notification events, responses and errors.
@@ -210,6 +230,7 @@ FR-8 water/leak insight and FR-9 weekly summaries remain optional and are exclud
 - [ ] Define `t0` as successful creation of the first family in-app alert. A failed creation leaves timing unstarted; transport failure remains visible and is never labelled as an unanswered delivered alert.
 - [ ] Adopt versioned experimental defaults: dataset seed/size/splits, causal warm-up, rule thresholds and recovery candidate settings. Mark these as proposed settings rather than measured outcomes.
 - [ ] Define a small deterministic development fixture and a separate representative evaluation dataset/challenge pack. Keep scenario labels out of event payloads used by inference.
+- [ ] Define the MLflow experiment/model naming, run/version lineage contract, comparable-validation protocol and explicit promotion/rejection gates. The existing local smoke fixture does not close the full data/model gates.
 
 **Touches:** this plan, contract examples under `docs/`, acceptance checklist and later seed/test fixtures. Keep the product requirements as the authoritative source; update them only for an actual product decision.
 
@@ -228,6 +249,7 @@ FR-8 water/leak insight and FR-9 weekly summaries remain optional and are exclud
 - [ ] Create the Vite React/TypeScript application, React Router routes and the FastAPI application; pin compatible dependencies and record runtimes.
 - [ ] Add PostgreSQL connection handling and Alembic migrations. Create identity, household, consent/contact, demo-clock and job records first; add domain tables with their consuming phases.
 - [ ] Add Compose services, database/artifact volumes, readiness checks and `.env.example`. Keep generated data, secrets, local databases and model files out of Git.
+- [ ] Add the MLflow tracking service with a dedicated PostgreSQL database/user, proxied persistent artifacts, `MLFLOW_TRACKING_URI` and operator-only UI access. MLflow manages its own schema; back up before upgrades and keep application migrations separate.
 - [ ] Seed resident, family, operator and responder accounts with synthetic households. Hash passwords, load signing secrets from environment and implement bounded token expiry.
 - [ ] Enforce account membership, accepted contact and assignment checks in API dependencies and response queries. Add the event-ticket boundary when implementing streaming.
 - [ ] Implement resident opt-in and contact acceptance records so no monitoring can begin without the required permissions. These controls must work through the API before the first inference journey.
@@ -263,6 +285,7 @@ FR-8 water/leak insight and FR-9 weekly summaries remain optional and are exclud
 - [ ] Deduplicate observation IDs and repeated gate passages. Link parking/gate records for one trip to a single movement observation; preserve their provenance.
 - [ ] Store observation time and availability time independently. Distinguish missing, stale, failed and available source states.
 - [ ] Create immutable dataset manifests with generator/configuration versions, seed, canonical content checksum, split membership and exclusions. Regeneration creates a new version rather than overwriting a referenced dataset.
+- [ ] Log MLflow training/validation dataset inputs and attach the immutable manifest to every consuming run. Preserve application dataset IDs and distinguish the local smoke fixture from the full dataset.
 - [ ] Split household identities and time ranges before fitting or feature selection. Keep complete episodes and overlapping windows together; exclude episodes crossing scored cutoffs.
 - [ ] Add paginated dataset/observation APIs, source-coverage summaries and the first functional Pipeline and Dataset Explorer pages.
 - [ ] Show labels as evaluation annotations only; exclude label/scenario columns from the inference-input response and model feature allowlist.
@@ -306,11 +329,14 @@ Use the proposed 14-day causal warm-up consistently. Earlier unlabelled holdout-
 - [ ] Compare raw rule-only, model-only and combined decisions on validation. Select the exact combined policy and thresholds explicitly; participant incidents always require both fresh corroborating utility deviations and shared safeguards.
 - [ ] Add persisted training-run states: queued, running, completed and failed, with actual steps, logs and errors. Run CPU work in a separate process while workflow deadline processing stays responsive.
 - [ ] Save artifact checksum, dependency versions, preprocessing/feature definition, dataset/split references, parameters, threshold, policy version and metrics. Write artifacts atomically before marking a run complete.
+- [ ] Integrate MLflow run creation, explicit domain metrics and `mlflow.sklearn` artifact logging/registration into the real training job; store IDs in application job records and expose tracking failures honestly.
+- [ ] Train an initial version and at least one genuine later-data update using training households only. Log predecessor, change reason, data/code/environment lineage and a fixed-validation comparison. Record rejected candidates; do not manufacture an improvement to satisfy the demo.
 - [ ] Reconcile interrupted jobs after restart: mark stale runs interrupted/failed with a visible retry action and preserve the previously active model. Do not display successful completion without its artifact/report.
 - [ ] Define episode matching, detection delay origin, evaluable household-day exposure and unsupported-data exclusions before reporting results.
 - [ ] Report episode precision/recall and confusion counts, unnecessary alerts per household-day, detection delay, duplicates, coverage failures and routine/availability subgroup results, with counts and denominators. Mark undefined metrics rather than substituting zero.
 - [ ] Keep the test partition unavailable for threshold sliders/model selection. Freeze the selected artifact and complete policy, including recovery settings, before the one final test run in Phase 7.
 - [ ] Implement explicit candidate activation and rollback with audit events and compatibility checks. A current incident retains the model/policy snapshot that produced it.
+- [ ] Resolve MLflow aliases to numeric versions, verify the complete artifact/signature/policy bundle and switch application serving references atomically. Mirror/reconcile aliases after activation; a tracking outage cannot replace the loaded active model.
 
 **Touches:** feature/baseline/policy code, training/evaluation entry points, worker process handling, run/model/report records and migrations, artifact persistence, minimal training/model APIs and focused ML fixtures/tests.
 
@@ -324,12 +350,13 @@ Use the proposed 14-day causal warm-up consistently. Earlier unlabelled holdout-
 - [ ] Re-running the recorded configuration reproduces outputs within declared numerical tolerances.
 - [ ] Failed training, interrupted execution, missing/corrupt artifacts and incompatible activation preserve the previous active artifact and show the real failure.
 - [ ] A small hand-labelled episode fixture verifies the evaluator's counts, false-alert denominator and detection delays.
+- [ ] MLflow contains two real training/version records with comparable validation lineage, plus promotion/rejection evidence. Loading a registered version reproduces predictions; a rejected or failed candidate leaves the serving reference unchanged.
 
-### Phase 4 — Incident engine, notification delivery and first Flutter journey
+### Phase 4 — Incident engine, notification delivery and first iOS journey
 
 **Goal:** make actual selected-model inference create a traceable family pop-up and the required unanswered response sequence.
 
-**Prerequisites:** Phases 1–3, an active artifact, seeded consent/contact acceptance and a reachable Flutter development target.
+**Prerequisites:** Phases 1–3, an active artifact, seeded consent/contact acceptance and a reachable iOS development target.
 
 **Implementation tasks:**
 
@@ -338,8 +365,8 @@ Use the proposed 14-day causal warm-up consistently. Earlier unlabelled holdout-
 - [ ] Create the first minimal family notification and establish `t0` only on successful creation. Persist resident and township due times from `t0`; do not use browser timers or reset deadlines after retry.
 - [ ] Commit incident transitions and notification records in the same transaction. The dispatcher reads committed pending events, rechecks current permissions/state and records attempts/results.
 - [ ] Implement scoped WebSocket delivery from persisted events. For the single API instance, reading new records by cursor is sufficient; the database remains authoritative after connection loss.
-- [ ] Add catch-up fetch after reconnect, expired-ticket recovery and event-ID deduplication. The Flutter client records receipt/open only when observed and fetches current incident state before applying actions.
-- [ ] Build Flutter login, a labelled demo home, family/resident incident detail, foreground pop-up and incident deep link. Use a template reason derived from actual policy codes.
+- [ ] Add catch-up fetch after reconnect, expired-ticket recovery and event-ID deduplication. The iOS client records receipt/open only when observed and fetches current incident state before applying actions.
+- [ ] Build iOS login, a labelled demo home, family/resident incident detail, foreground pop-up and incident deep link. Use a template reason derived from actual policy codes.
 - [ ] Add family acknowledgement, completed check-in, resident confirmation and resident help/contact actions. Viewing/opening an alert does not acknowledge responsibility.
 - [ ] Implement unanswered-stage checks in the worker with persisted deadlines and transactional rechecks. Family acknowledgement stops unsent unanswered stages but retains open follow-up and ownership.
 - [ ] Add the minimal assigned township task surface and explicit acceptance/outcome actions. Restrict its payload to necessary incident details.
@@ -362,13 +389,13 @@ Use the proposed 14-day causal warm-up consistently. Earlier unlabelled holdout-
 
 If transport delivery is unknown or failed, show that fact at every later stage. A stage schedule does not prove that the recipient received an alert. Capture notification delays independently from response intervals.
 
-**Touches:** incident/policy/notification domain code, PostgreSQL constraints, worker deadlines, event contracts, Flutter client, basic web trace page, database concurrency tests and delivery fixtures.
+**Touches:** incident/policy/notification domain code, PostgreSQL constraints, worker deadlines, event contracts, iOS client, basic web trace page, database concurrency tests and delivery fixtures.
 
 **Deliverables:** first complete selected-model-to-family-pop-up journey, resident/township stages, human response actions and matching trace IDs in both clients.
 
 **Verification and exit gate:**
 
-- [ ] One qualified inference produces one incident and a real Flutter pop-up; dataset/window/model/incident/event references join correctly.
+- [ ] One qualified inference produces one incident and a real iOS pop-up; dataset/window/model/incident/event references join correctly.
 - [ ] Boundary checks at immediately before/at +5 and +10 minutes send each eligible stage once. Refresh/restart does not change deadlines.
 - [ ] Acknowledgement is distinct from resolution; help remains open. Completed outcomes stop later unsent alerts.
 - [ ] Duplicate inference, notification retry, double tap, offline/reconnect and late-response races preserve consistent incident/task ownership.
@@ -386,6 +413,7 @@ If transport delivery is unknown or failed, show that fact at every later stage.
 - [ ] Connect dataset generation and training actions to real persisted jobs. Display actual step changes or elapsed time when measurable progress is unavailable; do not invent percentage progress.
 - [ ] Add validation-only threshold exploration and rule/model/combined comparison. Changing a threshold creates a new evaluation/policy version rather than mutating a completed report.
 - [ ] Implement the model registry UI: candidate/active distinction, dataset/run links, activation, prior-version rollback and compatibility/failure feedback.
+- [ ] Extend the implemented local React/FastAPI workspace to the full episode-level experiment/registry lifecycle, preserving its training controls, comparisons, fingerprints and in-app evidence panels. Clearly separate application serving configuration from registry selection; no external MLflow UI is required.
 - [ ] Show the complete inference → policy → incident → notification → response trace and distinguish operator evidence from the minimal participant reason.
 - [ ] Add operations summaries for source availability/delay, missingness, job errors, inference/alert volume, notification creation-to-receipt latency and worker heartbeat.
 - [ ] Compare recent eligible feature distributions with a versioned reference, using the same feature version and visible sample counts. Define freshness and missingness per source/window; sparse-source silence alone is not a failed feed.
@@ -400,9 +428,9 @@ If transport delivery is unknown or failed, show that fact at every later stage.
 | --- | --- |
 | `/pipeline` | Six source groups; ingestion/validation/features/inference/notification stage counts; freshness, rejected records, errors and stage details |
 | `/datasets` and `/datasets/:id` | Version/seed/checksum; split membership; eligible/excluded counts; household/source timelines, labels as evaluation annotations and distributions |
-| `/training` and `/training/:id` | Start a bounded experiment; actual state/configuration/logs/errors; artifact reference; clearly labelled prior-run replay |
-| `/evaluation` | Rule/model/combined episode results; confusion counts; threshold trade-offs on validation; counts/denominators and test untouched/frozen/evaluated status |
-| `/models` | Candidate and active versions; data/feature/policy references; explicit activation and rollback history |
+| `/training` and `/training/:id` | Real job state/logs; MLflow experiment/run and predecessor links; parameters, data/code versions and labelled prior-run replay |
+| `/evaluation` | MLflow-backed rule/model/combined reports; same-benchmark run comparison; validation-only trade-offs; counts/denominators and final-test status |
+| `/models` | MLflow registered numeric versions and aliases; application-active configuration; feature/policy compatibility and activation/rollback history |
 | `/inference` and `/incidents/:id` | Scored window, actual reason/coverage, policy decision and shared incident/event/response timeline |
 | `/operations` | Feed delays/missingness, volumes, job/worker state, delivery latency/failures and feature-drift comparisons |
 | `/demo` | Restricted scenario load/time/reset controls with visible simulation clock; account switching authenticates the actual seeded identity |
@@ -428,7 +456,7 @@ If transport delivery is unknown or failed, show that fact at every later stage.
 
 **Implementation tasks:**
 
-- [ ] Complete Flutter wellbeing setup: resident consent, monitored household, accepted family contact and permission for township escalation. Assisted setup does not transfer consent to the helper.
+- [ ] Complete iOS wellbeing setup: resident consent, monitored household, accepted family contact and permission for township escalation. Assisted setup does not transfer consent to the helper.
 - [ ] Complete wellbeing overview with learned routine, all six source statuses/freshness, uncertain context, away periods and incident history. Show app activity attributed to the correct account/role.
 - [ ] Implement resident-owned away start/end controls; suppress only new inactivity incidents during the period and preserve existing follow-up and deadlines.
 - [ ] Implement the proposed recovery experiment: two consecutive completed 15-minute windows with fresh evidence from two independent groups, including meaningful activity explicitly attributable to the enrolled resident.
@@ -445,7 +473,7 @@ If transport delivery is unknown or failed, show that fact at every later stage.
 - [ ] Record administrative withdrawal closure separately from human check-in and AI recovery; it must not count as a wellbeing confirmation or a completed useful check-in.
 - [ ] Finalise recovery policy/feature versions, validate closure failures and freeze the full selected configuration for Phase 7 test evaluation.
 
-**Touches:** consent/away/withdrawal records and actions, recovery policy, worker scheduling, notification filters, follow-up tasks/handoffs, Flutter settings/overview screens, dashboard histories/metrics and scenario fixtures.
+**Touches:** consent/away/withdrawal records and actions, recovery policy, worker scheduling, notification filters, follow-up tasks/handoffs, iOS settings/overview screens, dashboard histories/metrics and scenario fixtures.
 
 **Deliverables:** complete resident controls, versioned sustained recovery, explicit responder disposition and observable 23-hour withdrawal handling.
 
@@ -469,15 +497,16 @@ If transport delivery is unknown or failed, show that fact at every later stage.
 - [ ] Evaluate the frozen full configuration on the untouched test partition once for the reported version. Save exact versions/checksums, counts, eligibility/exclusions, episode metrics and recovery false-closure/delay results.
 - [ ] Keep a separate labelled challenge-pack report for rare edge cases. Do not present its deliberately balanced prevalence as an expected operating rate.
 - [ ] After viewing test results, do not tune and reuse the same test as untouched evidence. Any further tuning needs a newly held-out evaluation protocol and a clearly labelled later report.
-- [ ] Restart API, workflow worker, training process and Flutter independently. Reconcile pending jobs/alerts and verify no duplicate notification, lost ownership or reset deadline.
+- [ ] Restart API, workflow worker, training process and iOS independently. Reconcile pending jobs/alerts and verify no duplicate notification, lost ownership or reset deadline.
 - [ ] Run the full proposed dataset through aggregate queries and representative charts on the demonstration machine. Record machine/runtime, row counts and observed timings; optimise confirmed bottlenecks with pagination, aggregation and targeted indexes.
 - [ ] Verify authentication expiry, user/assignment scoping, bounded job requests, invalid actions and artifact loading. Load only internally generated, checksum-verified model artifacts; do not accept untrusted joblib uploads.
 - [ ] Verify HTTPS/WSS and secret/configuration handling for any remotely accessible demo. Keep database ports private and demo mutations gated; local-only development remains the default.
 - [ ] Build the web bundle and backend containers, apply migrations to a clean database, seed accounts and restore the selected artifacts. Verify persistent volumes and a backup/restore procedure for demonstration evidence.
 - [ ] Add the actual setup, test, seed/generate/train/evaluate, start/stop and recovery commands to README or a runbook. Document device networking and demo account configuration without committing passwords/tokens.
-- [ ] Run a browser/Flutter accessibility and usability pass: keyboard/focus, readable labels, large resident actions, status text, errors, chart alternatives and desktop/compact layouts.
+- [ ] Run a browser/iOS accessibility and usability pass: keyboard/focus, readable labels, large resident actions, status text, errors, chart alternatives and desktop/compact layouts.
 - [ ] Rehearse the judge walkthrough below, including at least one delivery/offline failure and a clearly labelled prior training run if used.
 - [ ] Record completed gates, known failures/limits and exact artifact versions. Leave pilot commitments and unvalidated outcomes as proposals.
+- [ ] Verify MLflow HTTP logging and artifact download, registry loading, tracking-service restart, metadata/artifact restore and failed-promotion retention. Rehearse initial → retrained candidate → comparison → explicit promotion/rejection → rollback.
 
 **Touches:** targeted fixes across callers/contracts, tests, CI configuration, Compose/build configuration, README/runbook, acceptance evidence and the final evaluation report.
 
@@ -491,7 +520,7 @@ This matrix groups related checks; it supplements rather than replaces the indiv
 
 | Scenario group | Expected evidence | Primary phase / check |
 | --- | --- | --- |
-| Consent and accepted contact | Monitoring remains disabled until resident opt-in, accepted family contact and escalation permission exist | 1, 6 / API and Flutter |
+| Consent and accepted contact | Monitoring remains disabled until resident opt-in, accepted family contact and escalation permission exist | 1, 6 / API and iOS |
 | Normal routine; no mall/parking/gate events | Source status shown; no incident or automated personal-safety assertion | 2–4 / policy fixture |
 | Sustained dual-utility deviation | Fresh positive baselines, qualifying window and no resident-linked conflict create one policy-approved family incident with model comparison | 3, 4 / policy and integration |
 | Only one unusual utility | Candidate may be visible to operator; no participant incident | 3 / policy fixture |
@@ -502,14 +531,14 @@ This matrix groups related checks; it supplements rather than replaces the indiv
 | Duplicate card reads and parking/gate same trip | One passage/movement observation; provenance retained | 2, 6 / deduplication fixture |
 | Late/out-of-order observation; future data | Original decision uses only information available at that time | 2, 3 / causal replay fixture |
 | Away or outside expected active period | No new inactivity incident; current follow-up remains visible | 3, 6 / policy and UI |
-| Trained inference to client | Actual artifact produces inference and matching incident/event IDs; Flutter receives and displays pop-up/deep link | 4 / real client integration |
+| Trained inference to client | Actual artifact produces inference and matching incident/event IDs; iOS receives and displays pop-up/deep link | 4 / real client integration |
 | Five and ten unanswered minutes | Resident then township stage once, based on persisted deadlines, including boundary/refresh/restart cases | 4 / clock and database integration |
-| Family acknowledgement versus outcome | Acknowledgement assigns responsibility/stops unsent stages; only completed outcome resolves | 4 / API and Flutter |
-| Resident confirmation versus help | Confirmation resolves; help stays open with owner and blocks AI closure until addressed | 4, 6 / API and Flutter |
+| Family acknowledgement versus outcome | Acknowledgement assigns responsibility/stops unsent stages; only completed outcome resolves | 4 / API and iOS |
+| Resident confirmation versus help | Confirmation resolves; help stays open with owner and blocks AI closure until addressed | 4, 6 / API and iOS |
 | Late response, duplicate action and escalation race | One incident; idempotent events; explicit ownership/handoff; cancelled transitions cannot execute later | 4, 6 / PostgreSQL concurrency |
 | First alert creation failure; later transport failure | Failed creation does not start `t0`; failed/unknown delivery is visible, retryable and never invented as receipt | 4 / notification integration |
 | Resident-stage failure | Original +10 deadline remains; escalation shows earlier failure honestly; retry respects current state | 4 / worker integration |
-| Offline client, reconnect and app restart | Fetch authoritative incident, replay/deduplicate persisted events and preserve delivery uncertainty | 4, 7 / Flutter and stream integration |
+| Offline client, reconnect and app restart | Fetch authoritative incident, replay/deduplicate persisted events and preserve delivery uncertainty | 4, 7 / iOS and stream integration |
 | One resumed source or household-only recovery | Evidence accumulates or closure is blocked; no automatic resolution | 6 / recovery fixture |
 | Sustained independent recovery with resident attribution | Distinct AI outcome with windows/groups/versions and scoped notifications | 6 / recovery integration |
 | Recovery failure, stale source or unresolved help | No AI closure | 6 / recovery fixture |
@@ -520,6 +549,8 @@ This matrix groups related checks; it supplements rather than replaces the indiv
 | Failed dataset/training job or corrupt artifact | Real failure shown; active model remains usable; no invented metrics/progress | 2, 3, 5 / worker/API/UI |
 | Regeneration, partitions and label leakage | Same seed/configuration reproduces data; household/episode separation and feature allowlist hold | 2, 3 / deterministic and leakage checks |
 | Model switch/rollback during open incident | New inference uses selected version; open incident retains its evidence/policy snapshot | 3, 5 / registry integration |
+| MLflow evolution and regression | Two genuine runs/versions, predecessor/data/code lineage and comparable validation; failed quality gate retains active model | 3, 5, 7 / MLflow integration |
+| MLflow unavailable or alias update fails | Existing loaded model continues; new tracking/activation failure is visible; application/alias state is reconciled without changing historical incidents | 3, 5, 7 / fault integration |
 | Frozen untouched-test evaluation | Parameters and recovery policy frozen before test; report records one evaluation and all denominators | 7 / evaluator/report review |
 | Operator/family/responder isolation | Direct URL, guessed ID, changed filter and stream requests cannot cross permitted scope | 1, 4–7 / negative API/stream tests |
 | Clock advance/reset | Shared labelled time; chronological processing; only selected demo-run state reset, immutable evidence retained | 1, 5, 7 / clock/demo integration |
@@ -531,9 +562,9 @@ This matrix groups related checks; it supplements rather than replaces the indiv
 - Use a dedicated PostgreSQL test database for uniqueness, transactions, migration compatibility and response/escalation/withdrawal races. Never reset the development or demonstration database as a test fixture.
 - Use Vitest only for non-trivial client behaviour such as event deduplication or status rendering. Do not create a test for every static component.
 - Use Playwright for login/scope, dataset-to-model navigation, the incident trace, model changes and demo controls against the real API.
-- Use Flutter tests and one emulator/device walkthrough for actual foreground reception, pop-up/deep-link actions, identity attribution and reconnection.
+- Use XCTest/XCUITest and one simulator/device walkthrough for actual foreground reception, pop-up/deep-link actions, identity attribution and reconnection.
 - Do not stub the trained model, delivery event or backend timer in the final end-to-end acceptance path. Label prior-run replays and simulated time explicitly.
-- Add CI when runnable code exists: frontend type-check/build and focused tests, backend tests with PostgreSQL, Flutter checks and the selected browser smoke journeys. Run expensive full generation/training once per relevant change or release, rather than on every documentation edit.
+- Add CI when runnable code exists: frontend type-check/build and focused tests, backend tests with PostgreSQL, iOS checks and the selected browser smoke journeys. Run expensive full generation/training once per relevant change or release, rather than on every documentation edit.
 
 ## 7. Demonstration and delivery milestones
 
@@ -550,9 +581,9 @@ This matrix groups related checks; it supplements rather than replaces the indiv
 
 1. Show the synthetic-data label, enrolled elderly resident, accepted contact and visible simulation clock.
 2. Inspect six source groups, dataset version, split membership, source coverage and a normal routine timeline.
-3. Open an actual completed training run; show configuration, artifact and rule/model/combined validation metrics. If replaying it, label it as a prior run.
+3. Compare the initial and genuinely retrained version in MLflow: predecessor/data changes, same-validation metrics and explicit promotion/rejection. Show artifact and rule/model/combined results. If replaying completed runs, label them as prior runs; report unchanged/worse results honestly.
 4. Show the selected model and replay an eligible deviation. Open its feature window, coverage checks and inference decision.
-5. Match the inference to its incident and notification ID, then show the real family Flutter pop-up and deep link.
+5. Match the inference to its incident and notification ID, then show the real family iOS pop-up and deep link.
 6. In a fresh unanswered branch, advance labelled time to +5 and +10; show resident notification, assigned township work and unchanged persisted deadlines after refresh.
 7. In separate branches, demonstrate family acknowledgement versus completed check-in, resident confirmation and an open request for help.
 8. Show invalid recovery being rejected, then valid sustained independent recovery with an explicit AI outcome and accepted-task disposition.
@@ -562,7 +593,7 @@ This matrix groups related checks; it supplements rather than replaces the indiv
 
 ### 7.2 Handover package
 
-- [ ] README/runbook with supported runtimes, environment placeholders, migrations, seed/generate/train/evaluate/start/test commands and Flutter network setup.
+- [ ] README/runbook with supported runtimes, environment placeholders, migrations, seed/generate/train/evaluate/start/test commands and iOS network setup.
 - [ ] Committed application source, lockfiles, migrations, bounded experiment defaults and deterministic development/challenge fixtures.
 - [ ] Immutable dataset/split manifest, chosen artifact/checksum, frozen policy/thresholds and validation/test reports stored in the persistent artifact location.
 - [ ] Named acceptance evidence, browser/client walkthrough notes and any required failure still open.
@@ -575,8 +606,8 @@ Before each code change, trace the affected API/domain function through every ca
 
 | Change | Places that must stay aligned |
 | --- | --- |
-| Schema or state transition | Migration, ORM record, constraints, policy/worker, API schema, web/Dart readers, seeds, fixtures and integration checks |
-| Event contract or delivery state | Event writer, persisted replay, WebSocket scope, Flutter parsing/pop-up, dashboard timeline, receipts and reconnect tests |
+| Schema or state transition | Migration, ORM record, constraints, policy/worker, API schema, web/Swift readers, seeds, fixtures and integration checks |
+| Event contract or delivery state | Event writer, persisted replay, WebSocket scope, iOS parsing/pop-up, dashboard timeline, receipts and reconnect tests |
 | Feature/model/policy version | Generator manifest, offline/online feature code, training/evaluator, registry activation, incident snapshot, chart labels and reports |
 | Permission or withdrawal rule | REST reads/actions, stream subscriptions/dispatch, queued jobs/retries, resident UI, responder tasks and negative access tests |
 | Clock/deadline logic | Stored deadlines, worker due processing, recovery windows, withdrawal bound, demo controls, both clients and boundary/race tests |
@@ -591,9 +622,9 @@ Prefer existing domain functions/components and platform facilities. Keep one po
 | --- | --- | --- |
 | Real utility, gate, parking and mall feeds | Synthetic data only; no provider credentials or permissions assumed | Separate data-access and identity-linkage validation before a pilot |
 | Production identity/security operations | Seeded demo accounts with server checks demonstrate boundaries; not proof of production readiness | Before introducing real people/data or a public service |
-| Background/closed-app push, SMS or calls | Foreground Flutter stream is the required path; no external communications | Explicit additional scope and validated delivery requirements |
+| Background/closed-app push, SMS or calls | Foreground iOS stream is the required path; no external communications | Explicit additional scope and validated delivery requirements |
 | Additional models, LLM explanations, leak insights and weekly summaries | One anomaly candidate and template reasons; FR-8/FR-9 deferred | After all required prototype gates and a concrete usefulness decision |
-| Distributed queue, Redis, Kubernetes and separate MLOps platform | Single-instance API/worker plus PostgreSQL and persistent artifacts | Measured throughput, multiple API instances or operating needs justify them |
+| Distributed queue, Redis, Kubernetes and larger orchestration platforms | MLflow Tracking/Registry is included; keep remaining execution to the single API/worker and PostgreSQL | Measured throughput, multiple API instances or operating needs justify further infrastructure |
 | Persistent-volume loss or incompatible artifacts | Back up demonstration evidence; pin environment and verify artifact checksums | Hosted storage/recovery requirements before wider use |
 | Clinical or field effectiveness | Synthetic scenario metrics demonstrate pipeline/workflow behaviour only | Representative real-data evaluation and supervised operating validation |
 | Localisation, fallback channels and wider resident cohorts | Required readable accessible prototype first | Pilot/accessibility research and an explicit scope decision |
@@ -615,3 +646,4 @@ The following official documentation supports the selected tools. The architectu
 - [PostgreSQL indexes](https://www.postgresql.org/docs/current/sql-createindex.html) and [explicit locking](https://www.postgresql.org/docs/current/explicit-locking.html): constraints/indexes and transactional concurrency primitives.
 - [scikit-learn Isolation Forest](https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.IsolationForest.html) and [common pitfalls](https://scikit-learn.org/stable/common_pitfalls.html): anomaly-model behaviour and avoiding preprocessing/data leakage.
 - [Docker Compose](https://docs.docker.com/compose/): reproducible multi-container development setup.
+- [MLflow tracking server](https://mlflow.org/docs/latest/self-hosting/architecture/tracking-server/), [model registry workflow](https://mlflow.org/docs/latest/ml/model-registry/workflow/) and [sklearn integration](https://mlflow.org/docs/latest/api_reference/python_api/mlflow.sklearn.html): SQL-backed tracking, persistent artifacts, registered versions/aliases and model logging/loading.

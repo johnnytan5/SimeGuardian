@@ -1,7 +1,7 @@
 # SimeGuardian — Business and Product Requirements
 
 18 October 2026 · Tan Hao Wen  
-Version 0.5 · Native iPhone stack and mobile implementation plan
+Version 0.6 · Native iPhone stack and MLflow-backed model evolution
 
 This is the single requirements document for SimeGuardian. It combines business rationale, product behaviour, technical requirements, dataset and AI design, prototype acceptance and proposed rollout. Confirmed decisions are distinguished from design defaults and field/business proposals. This document specifies the work; it does not claim that datasets, applications, trained models or pilot results already exist.
 
@@ -47,6 +47,8 @@ SimeGuardian is an opt-in wellbeing service for elderly SDP township residents f
 | Eligible users | Residents aged 60+ first; expand to other residents after initial validation |
 | Application | Native iPhone app built with Swift and SwiftUI in Xcode, with resident and family roles; Android is a later scope decision |
 | Operations | Web dashboard showing the pipeline, datasets, training runs, model evaluation and inference-to-app notification delivery |
+| MLOps tooling | MLflow Tracking and Model Registry for real experiment history, dataset/code lineage, registered model versions and reviewed promotion/rollback |
+| Model evolution | Demonstrate an initial model and at least one genuine retraining round on later training data; compare under the same validation protocol and retain rejected candidates; improvement requires measured evidence |
 | Monitoring unit | Detect changes at household level, then check on the enrolled resident |
 | Data sources | Combine electricity, water, parking/car-plate movement, shopping mall activity, guarded-gate access cards and resident app activity; all simulated |
 | Detection | Combine learned personal routines, likely-home context, cross-signal checks and a trained anomaly model; retain a simple rule baseline for comparison |
@@ -325,6 +327,8 @@ Require valid units and event times, stable identifiers, explicit missingness, n
 Learn a personal routine from prior history, then compare a transparent statistical/rule baseline with one initial anomaly-model candidate. A proposed first candidate is Isolation Forest on baseline-normalised multi-signal features; it is an anomaly detector rather than a medical classifier ([official model documentation](https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.IsolationForest.html)). Keep its score separate from any claim about health or a calibrated probability.
 
 Train on normal routine examples, choose the alert threshold on validation episodes, and evaluate the frozen artifact on test episodes. The active artifact is selected explicitly and records dataset, feature, threshold and model versions. Show actual run state, parameters, metrics and failures. A saved completed run may be replayed for a quick demo, but must be labelled as a prior run rather than live training.
+
+Use MLflow Tracking and Model Registry to record an initial model and at least one actual retraining round, with predecessor/change reason, data/split/code/environment lineage, measured metrics and registered artifacts. Compare evolving versions on the same validation benchmark, retain failed or regressing candidates, and explicitly record promotion/rejection and rollback. Additional versions alone do not establish improvement. Do not tune successive versions on the untouched test set; freeze the final configuration before its reported test evaluation. The [MLflow runbook](MLFLOW.md) describes the implemented synthetic feature-window smoke demonstration and its limits; full six-source, episode-policy and app integration remain in the [implementation plan](IMPLEMENTATION_PLAN.md).
 
 The model and rule propose concerns; a shared policy checks signal coverage, likely-home uncertainty, away periods and conflicting personal activity. For the first inactivity experiment, require both valid utility feeds to corroborate a deviation. A model score with only one unusual utility remains an operator-visible candidate rather than a family incident. Neither an absent context feed nor a model score may bypass missing-data handling. Compare model-only, rule-only and combined results in the dashboard before selecting the active policy.
 

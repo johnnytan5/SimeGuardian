@@ -7,6 +7,15 @@ __pycache__/
 .venv/
 dist/
 build/
+artifacts/
+mlartifacts/
+mlruns/
+*.db
+*.db-shm
+*.db-wal
+.pytest_cache/
+test-results/
+playwright-report/
 
 # ML run artifacts (re-create with ml/train.py); latest.json is kept for the dashboard
 ml/runs/*/

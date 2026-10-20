@@ -69,3 +69,37 @@ ml/.venv/bin/python -m unittest discover ml
 - [Web dashboard implementation plan](docs/IMPLEMENTATION_PLAN.md) and [mobile implementation plan](docs/MOBILE_IMPLEMENTATION_PLAN.md) (written for native/Flutter clients; this branch uses Expo Go)
 - [Demo design](docs/superpowers/specs/2026-10-19-simeguardian-demo-design.md)
 - [Implementation plan](docs/superpowers/plans/2026-10-19-simeguardian-demo.md)
+- [MLflow prototype: setup, model evolution and integration](docs/MLFLOW.md)
+- [Dashboard walkthrough and implementation boundaries](docs/DASHBOARD.md)
+
+## Run the MLflow dashboard
+
+The React MLflow dashboard is served by FastAPI. It includes the operations overview, six-source pipeline preview, dataset explorer, real MLflow training/evaluation/registry controls, model inference, incident timelines, operations, demo controls and a restricted responder view. MLflow stays behind the backend; operators do not need its separate UI.
+
+The local replay runs the registered champion on explicit synthetic feature windows and persists model/policy decisions, simulated notification creation, deadlines and human outcomes. The six-source explorer is a separate development fixture; the full causal source pipeline, native iPhone delivery, recovery and withdrawal workflows remain planned. See the [dashboard walkthrough and implementation boundaries](docs/DASHBOARD.md).
+
+Start the local MLflow tracking service using [the runbook](docs/MLFLOW.md#run-locally). Then build the frontend from the repository root:
+
+```bash
+cd web
+npm ci
+npm run build
+```
+
+In another terminal, from the repository root:
+
+```bash
+cd backend
+uv sync --locked
+MLFLOW_DISABLE_TELEMETRY=true uv run --locked uvicorn app.main:app --host 127.0.0.1 --port 8000
+```
+
+Open [SimeGuardian](http://127.0.0.1:8000). FastAPI serves the built frontend and its API at the same origin.
+
+For frontend and backend development, install the dependencies above and run `make dev` from the repository root. This starts Vite at [127.0.0.1:5173](http://127.0.0.1:5173) and FastAPI at port 8000 with hot reload. Vite proxies `/api` to FastAPI. Press Ctrl+C to stop both. The MLflow tracking service still needs to be started separately using the runbook above.
+
+This is a loopback-only synthetic demo. Operator and responder sessions have different server-enforced scopes, but freely selecting these local identities is not production account authentication. Training creates a candidate; promotion is explicit and quality-gated. The next explicit replay inference resolves the selected numeric champion; no production inference service or phone transport is connected.
+
+Checks: run `uv run --locked pytest -q` in `backend/`, and `npm run build` in `web/`. With the two local services running and initial/retrained versions recorded, `npm run test:e2e` runs browser checks in installed Google Chrome. These cover routes, dataset filters, real training/registry actions, model-to-incident-to-responder flow, missing utilities, recovery from API errors and compact layouts. Tests append one synthetic candidate, temporarily roll back/restore the original champion and reset the current replay; they retain MLflow evidence.
+
+The requirements document reflects the review decisions and remains open for feedback. Dataset/model defaults, real data access, a field pilot, funding and operating commitments remain proposals.

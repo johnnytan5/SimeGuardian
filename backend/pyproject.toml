@@ -1,0 +1,20 @@
+[project]
+name = "simeguardian-mlops"
+version = "0.1.0"
+description = "Local MLflow experiment tracking and model-evolution prototype"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "fastapi>=0.144,<1",
+    "uvicorn>=0.54,<1",
+    "mlflow>=3.17.1,<4",
+    "numpy>=1.26,<3",
+    "pandas>=2.2,<4",
+    "scikit-learn>=1.5,<2",
+]
+
+[dependency-groups]
+dev = ["pytest>=8,<10", "httpx>=0.28,<1"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
