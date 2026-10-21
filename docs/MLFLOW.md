@@ -17,6 +17,8 @@ The fixture generates a small set of feature windows directly. It does not imple
 
 Use Python 3.12 and [uv](https://docs.astral.sh/uv/). Dependencies, including MLflow 3.17.1, are recorded in [uv.lock](../backend/uv.lock).
 
+For the full development stack, install the backend and frontend dependencies and run `make dev` from the repository root. It starts Vite (5173), FastAPI (8000) and MLflow (5050) together; Ctrl+C stops all three. Use `make dev-mlflow` to start only MLflow with the same persistent storage as the command below.
+
 From the repository root:
 
 ```bash

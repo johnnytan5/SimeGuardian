@@ -216,6 +216,870 @@ export const demoPlots: DemoPlot[] = [
       3.0060529
     ],
     "buildingId": 1213210518
+  },
+  {
+    "id": "SG-025",
+    "zone": "The Glades",
+    "point": [
+      101.57353345000001,
+      3.0051731
+    ],
+    "buildingId": 899069366
+  },
+  {
+    "id": "SG-026",
+    "zone": "The Glades",
+    "point": [
+      101.57933134999999,
+      3.01326005
+    ],
+    "buildingId": 896855273
+  },
+  {
+    "id": "SG-027",
+    "zone": "The Glades",
+    "point": [
+      101.576303475,
+      3.0133873
+    ],
+    "buildingId": 897819960
+  },
+  {
+    "id": "SG-028",
+    "zone": "The Glades",
+    "point": [
+      101.5782776,
+      3.0108119
+    ],
+    "buildingId": 896855260
+  },
+  {
+    "id": "SG-029",
+    "zone": "The Glades",
+    "point": [
+      101.57512565,
+      3.007301175
+    ],
+    "buildingId": 899069386
+  },
+  {
+    "id": "SG-030",
+    "zone": "The Glades",
+    "point": [
+      101.574375925,
+      3.013970075
+    ],
+    "buildingId": 1060108044
+  },
+  {
+    "id": "SG-031",
+    "zone": "The Glades",
+    "point": [
+      101.57260768750001,
+      3.011060875
+    ],
+    "buildingId": 897869966
+  },
+  {
+    "id": "SG-032",
+    "zone": "The Glades",
+    "point": [
+      101.5796511,
+      3.0115953500000003
+    ],
+    "buildingId": 896855265
+  },
+  {
+    "id": "SG-033",
+    "zone": "The Glades",
+    "point": [
+      101.5778847,
+      3.01232795
+    ],
+    "buildingId": 1148426719
+  },
+  {
+    "id": "SG-034",
+    "zone": "The Glades",
+    "point": [
+      101.57266630000001,
+      3.00954338
+    ],
+    "buildingId": 897915005
+  },
+  {
+    "id": "SG-035",
+    "zone": "The Glades",
+    "point": [
+      101.57502079999999,
+      3.012574275
+    ],
+    "buildingId": 897819963
+  },
+  {
+    "id": "SG-036",
+    "zone": "The Glades",
+    "point": [
+      101.57634605000001,
+      3.0090293499999996
+    ],
+    "buildingId": 898220746
+  },
+  {
+    "id": "SG-037",
+    "zone": "The Glades",
+    "point": [
+      101.57815389999999,
+      3.01346095
+    ],
+    "buildingId": 1148426786
+  },
+  {
+    "id": "SG-038",
+    "zone": "The Glades",
+    "point": [
+      101.57402467499999,
+      3.00712245
+    ],
+    "buildingId": 899069382
+  },
+  {
+    "id": "SG-039",
+    "zone": "The Glades",
+    "point": [
+      101.5733584,
+      3.0103506
+    ],
+    "buildingId": 897869952
+  },
+  {
+    "id": "SG-040",
+    "zone": "The Glades",
+    "point": [
+      101.57893775,
+      3.0123333
+    ],
+    "buildingId": 1148426701
+  },
+  {
+    "id": "SG-041",
+    "zone": "Putra Murni",
+    "point": [
+      101.57570737500001,
+      3.0228307
+    ],
+    "buildingId": 1147624579
+  },
+  {
+    "id": "SG-042",
+    "zone": "Putra Murni",
+    "point": [
+      101.572392425,
+      3.0195896500000003
+    ],
+    "buildingId": 896921692
+  },
+  {
+    "id": "SG-043",
+    "zone": "Putra Murni",
+    "point": [
+      101.57873085,
+      3.0163283
+    ],
+    "buildingId": 1147630720
+  },
+  {
+    "id": "SG-044",
+    "zone": "Putra Murni",
+    "point": [
+      101.577087,
+      3.0193361750000003
+    ],
+    "buildingId": 1147630824
+  },
+  {
+    "id": "SG-045",
+    "zone": "Putra Murni",
+    "point": [
+      101.574128075,
+      3.0206074000000003
+    ],
+    "buildingId": 896921694
+  },
+  {
+    "id": "SG-046",
+    "zone": "Putra Murni",
+    "point": [
+      101.57691514999999,
+      3.01537145
+    ],
+    "buildingId": 897802545
+  },
+  {
+    "id": "SG-047",
+    "zone": "Putra Murni",
+    "point": [
+      101.57229297499998,
+      3.01773595
+    ],
+    "buildingId": 1126656191
+  },
+  {
+    "id": "SG-048",
+    "zone": "Putra Murni",
+    "point": [
+      101.57407872499999,
+      3.01878875
+    ],
+    "buildingId": 1126656156
+  },
+  {
+    "id": "SG-049",
+    "zone": "Putra Murni",
+    "point": [
+      101.5773473,
+      3.0176855750000002
+    ],
+    "buildingId": 1147630783
+  },
+  {
+    "id": "SG-050",
+    "zone": "Putra Murni",
+    "point": [
+      101.574092425,
+      3.0225431
+    ],
+    "buildingId": 896838304
+  },
+  {
+    "id": "SG-051",
+    "zone": "Putra Murni",
+    "point": [
+      101.57897435,
+      3.0147777500000004
+    ],
+    "buildingId": 1147630635
+  },
+  {
+    "id": "SG-052",
+    "zone": "Putra Murni",
+    "point": [
+      101.5732997,
+      3.016569075
+    ],
+    "buildingId": 897802523
+  },
+  {
+    "id": "SG-053",
+    "zone": "Putra Murni",
+    "point": [
+      101.57556245,
+      3.01479535
+    ],
+    "buildingId": 1060108063
+  },
+  {
+    "id": "SG-054",
+    "zone": "Putra Murni",
+    "point": [
+      101.5757178,
+      3.0187950499999996
+    ],
+    "buildingId": 1147630833
+  },
+  {
+    "id": "SG-055",
+    "zone": "Putra Murni",
+    "point": [
+      101.5750787,
+      3.021773725
+    ],
+    "buildingId": 1147624507
+  },
+  {
+    "id": "SG-056",
+    "zone": "Putra Murni",
+    "point": [
+      101.5745321,
+      3.0156223000000004
+    ],
+    "buildingId": 1147630462
+  },
+  {
+    "id": "SG-057",
+    "zone": "Putra Bahagia",
+    "point": [
+      101.56352442500001,
+      2.998608375
+    ],
+    "buildingId": 1126430662
+  },
+  {
+    "id": "SG-058",
+    "zone": "Putra Bahagia",
+    "point": [
+      101.56630075000001,
+      2.9954824
+    ],
+    "buildingId": 900330625
+  },
+  {
+    "id": "SG-059",
+    "zone": "Putra Bahagia",
+    "point": [
+      101.566161375,
+      3.0001346
+    ],
+    "buildingId": 1126430617
+  },
+  {
+    "id": "SG-060",
+    "zone": "Putra Bahagia",
+    "point": [
+      101.573883975,
+      3.002283725
+    ],
+    "buildingId": 1126864323
+  },
+  {
+    "id": "SG-061",
+    "zone": "Putra Bahagia",
+    "point": [
+      101.5689893,
+      2.9957159
+    ],
+    "buildingId": 900330610
+  },
+  {
+    "id": "SG-062",
+    "zone": "Putra Bahagia",
+    "point": [
+      101.56418055,
+      2.996242825
+    ],
+    "buildingId": 1177607983
+  },
+  {
+    "id": "SG-063",
+    "zone": "Putra Bahagia",
+    "point": [
+      101.56704015000001,
+      2.997563375
+    ],
+    "buildingId": 1177608071
+  },
+  {
+    "id": "SG-064",
+    "zone": "Putra Bahagia",
+    "point": [
+      101.57135431666667,
+      2.9999424166666664
+    ],
+    "buildingId": 1126864285
+  },
+  {
+    "id": "SG-065",
+    "zone": "Putra Bahagia",
+    "point": [
+      101.5653857,
+      2.998401925
+    ],
+    "buildingId": 1126430529
+  },
+  {
+    "id": "SG-066",
+    "zone": "Putra Bahagia",
+    "point": [
+      101.567870575,
+      3.0001348
+    ],
+    "buildingId": 1126430490
+  },
+  {
+    "id": "SG-067",
+    "zone": "Putra Bahagia",
+    "point": [
+      101.57129580000002,
+      2.997912975
+    ],
+    "buildingId": 900254799
+  },
+  {
+    "id": "SG-068",
+    "zone": "Putra Bahagia",
+    "point": [
+      101.5676913,
+      2.99628595
+    ],
+    "buildingId": 900330619
+  },
+  {
+    "id": "SG-069",
+    "zone": "Putra Bahagia",
+    "point": [
+      101.56764139999999,
+      2.998800975
+    ],
+    "buildingId": 1126430429
+  },
+  {
+    "id": "SG-070",
+    "zone": "Putra Bahagia",
+    "point": [
+      101.5644195,
+      2.9975221999999997
+    ],
+    "buildingId": 1177608120
+  },
+  {
+    "id": "SG-071",
+    "zone": "Putra Bahagia",
+    "point": [
+      101.568441225,
+      2.9973539249999996
+    ],
+    "buildingId": 900254846
+  },
+  {
+    "id": "SG-072",
+    "zone": "Putra Bahagia",
+    "point": [
+      101.566472775,
+      2.9989716499999997
+    ],
+    "buildingId": 900254808
+  },
+  {
+    "id": "SG-073",
+    "zone": "Putra Mahkota",
+    "point": [
+      101.570920375,
+      2.988222875
+    ],
+    "buildingId": 1147305311
+  },
+  {
+    "id": "SG-074",
+    "zone": "Putra Mahkota",
+    "point": [
+      101.56862437500001,
+      2.9895673
+    ],
+    "buildingId": 901269877
+  },
+  {
+    "id": "SG-075",
+    "zone": "Putra Mahkota",
+    "point": [
+      101.56668965,
+      2.99304185
+    ],
+    "buildingId": 1177607551
+  },
+  {
+    "id": "SG-076",
+    "zone": "Putra Mahkota",
+    "point": [
+      101.5677058,
+      2.9911999000000002
+    ],
+    "buildingId": 1137295581
+  },
+  {
+    "id": "SG-077",
+    "zone": "Putra Mahkota",
+    "point": [
+      101.56770309999999,
+      2.9944682
+    ],
+    "buildingId": 1177607598
+  },
+  {
+    "id": "SG-078",
+    "zone": "Putra Mahkota",
+    "point": [
+      101.5693795,
+      2.988215525
+    ],
+    "buildingId": 1147305287
+  },
+  {
+    "id": "SG-079",
+    "zone": "Putra Mahkota",
+    "point": [
+      101.57020772499999,
+      2.989577325
+    ],
+    "buildingId": 1147305389
+  },
+  {
+    "id": "SG-080",
+    "zone": "Putra Mahkota",
+    "point": [
+      101.56972689999999,
+      2.9944776
+    ],
+    "buildingId": 1132699001
+  },
+  {
+    "id": "SG-081",
+    "zone": "Putra Mahkota",
+    "point": [
+      101.56896285000002,
+      2.9908129
+    ],
+    "buildingId": 1147305460
+  },
+  {
+    "id": "SG-082",
+    "zone": "Putra Mahkota",
+    "point": [
+      101.56637965,
+      2.994246175
+    ],
+    "buildingId": 1177607648
+  },
+  {
+    "id": "SG-083",
+    "zone": "Putra Mahkota",
+    "point": [
+      101.5677235,
+      2.9924079
+    ],
+    "buildingId": 1137295625
+  },
+  {
+    "id": "SG-084",
+    "zone": "Putra Mahkota",
+    "point": [
+      101.5686991,
+      2.9938713249999998
+    ],
+    "buildingId": 1132699090
+  },
+  {
+    "id": "SG-085",
+    "zone": "Putra Mahkota",
+    "point": [
+      101.5684697,
+      2.99179315
+    ],
+    "buildingId": 1147305541
+  },
+  {
+    "id": "SG-086",
+    "zone": "Putra Mahkota",
+    "point": [
+      101.5685741,
+      2.994863975
+    ],
+    "buildingId": 1132699119
+  },
+  {
+    "id": "SG-087",
+    "zone": "Putra Mahkota",
+    "point": [
+      101.567238175,
+      2.995474125
+    ],
+    "buildingId": 1177607690
+  },
+  {
+    "id": "SG-088",
+    "zone": "Putra Mahkota",
+    "point": [
+      101.5683399,
+      2.9930643
+    ],
+    "buildingId": 1132699077
+  },
+  {
+    "id": "SG-089",
+    "zone": "Putra Indah",
+    "point": [
+      101.56638999999998,
+      2.984711575
+    ],
+    "buildingId": 1135022119
+  },
+  {
+    "id": "SG-090",
+    "zone": "Putra Indah",
+    "point": [
+      101.56175329999999,
+      2.98590065
+    ],
+    "buildingId": 901646024
+  },
+  {
+    "id": "SG-091",
+    "zone": "Putra Indah",
+    "point": [
+      101.56159975,
+      2.9927787500000003
+    ],
+    "buildingId": 1131926806
+  },
+  {
+    "id": "SG-092",
+    "zone": "Putra Indah",
+    "point": [
+      101.56167565,
+      2.98895975
+    ],
+    "buildingId": 1132704803
+  },
+  {
+    "id": "SG-093",
+    "zone": "Putra Indah",
+    "point": [
+      101.56440045000001,
+      2.98678065
+    ],
+    "buildingId": 1135022166
+  },
+  {
+    "id": "SG-094",
+    "zone": "Putra Indah",
+    "point": [
+      101.56885857500001,
+      2.98566375
+    ],
+    "buildingId": 1135022079
+  },
+  {
+    "id": "SG-095",
+    "zone": "Putra Indah",
+    "point": [
+      101.56406335,
+      2.9931764999999997
+    ],
+    "buildingId": 1177607803
+  },
+  {
+    "id": "SG-096",
+    "zone": "Putra Indah",
+    "point": [
+      101.566937,
+      2.9869494000000003
+    ],
+    "buildingId": 1137295349
+  },
+  {
+    "id": "SG-097",
+    "zone": "Putra Indah",
+    "point": [
+      101.56260710000001,
+      2.99079925
+    ],
+    "buildingId": 1132704864
+  },
+  {
+    "id": "SG-098",
+    "zone": "Putra Indah",
+    "point": [
+      101.5625881,
+      2.994541925
+    ],
+    "buildingId": 1131926856
+  },
+  {
+    "id": "SG-099",
+    "zone": "Putra Indah",
+    "point": [
+      101.56688695,
+      2.98874775
+    ],
+    "buildingId": 1137295403
+  },
+  {
+    "id": "SG-100",
+    "zone": "Putra Indah",
+    "point": [
+      101.563276575,
+      2.98816435
+    ],
+    "buildingId": 1132704705
+  },
+  {
+    "id": "SG-101",
+    "zone": "Putra Indah",
+    "point": [
+      101.56529365,
+      2.9922016499999997
+    ],
+    "buildingId": 1137295876
+  },
+  {
+    "id": "SG-102",
+    "zone": "Putra Indah",
+    "point": [
+      101.56470145,
+      2.9945474499999998
+    ],
+    "buildingId": 900362041
+  },
+  {
+    "id": "SG-103",
+    "zone": "Putra Indah",
+    "point": [
+      101.56194655,
+      2.9874568
+    ],
+    "buildingId": 1132704664
+  },
+  {
+    "id": "SG-104",
+    "zone": "Putra Indah",
+    "point": [
+      101.563226425,
+      2.98594305
+    ],
+    "buildingId": 1132707431
+  },
+  {
+    "id": "SG-105",
+    "zone": "Putra Harmoni",
+    "point": [
+      101.58244392499999,
+      3.002126
+    ],
+    "buildingId": 1212702941
+  },
+  {
+    "id": "SG-106",
+    "zone": "Putra Harmoni",
+    "point": [
+      101.585556175,
+      3.009442875
+    ],
+    "buildingId": 887410685
+  },
+  {
+    "id": "SG-107",
+    "zone": "Putra Harmoni",
+    "point": [
+      101.5799609,
+      3.0092573833333334
+    ],
+    "buildingId": 1213217020
+  },
+  {
+    "id": "SG-108",
+    "zone": "Putra Harmoni",
+    "point": [
+      101.58295015,
+      3.004150625
+    ],
+    "buildingId": 897369606
+  },
+  {
+    "id": "SG-109",
+    "zone": "Putra Harmoni",
+    "point": [
+      101.58111825,
+      3.0043531000000003
+    ],
+    "buildingId": 896980831
+  },
+  {
+    "id": "SG-110",
+    "zone": "Putra Harmoni",
+    "point": [
+      101.58414513000001,
+      3.01039007
+    ],
+    "buildingId": 887410681
+  },
+  {
+    "id": "SG-111",
+    "zone": "Putra Harmoni",
+    "point": [
+      101.5807796,
+      3.002412875
+    ],
+    "buildingId": 1212702955
+  },
+  {
+    "id": "SG-112",
+    "zone": "Putra Harmoni",
+    "point": [
+      101.58205245,
+      3.003271325
+    ],
+    "buildingId": 1212702908
+  },
+  {
+    "id": "SG-113",
+    "zone": "Putra Harmoni",
+    "point": [
+      101.58163726000001,
+      3.0089989800000003
+    ],
+    "buildingId": 887410698
+  },
+  {
+    "id": "SG-114",
+    "zone": "Putra Harmoni",
+    "point": [
+      101.58314135,
+      3.0079779749999997
+    ],
+    "buildingId": 887410687
+  },
+  {
+    "id": "SG-115",
+    "zone": "Putra Harmoni",
+    "point": [
+      101.57962359999999,
+      3.0103796249999997
+    ],
+    "buildingId": 896855257
+  },
+  {
+    "id": "SG-116",
+    "zone": "Putra Harmoni",
+    "point": [
+      101.57887145,
+      3.0095731
+    ],
+    "buildingId": 896855255
+  },
+  {
+    "id": "SG-117",
+    "zone": "Putra Harmoni",
+    "point": [
+      101.5813014,
+      3.0053087
+    ],
+    "buildingId": 1213210566
+  },
+  {
+    "id": "SG-118",
+    "zone": "Putra Harmoni",
+    "point": [
+      101.58297819999999,
+      3.00308925
+    ],
+    "buildingId": 1212702915
+  },
+  {
+    "id": "SG-119",
+    "zone": "Putra Harmoni",
+    "point": [
+      101.58464798333334,
+      3.009698033333333
+    ],
+    "buildingId": 887410684
+  },
+  {
+    "id": "SG-120",
+    "zone": "Putra Harmoni",
+    "point": [
+      101.581227325,
+      3.003474975
+    ],
+    "buildingId": 1213210629
   }
 ];
 export const landmarks: Landmark[] = [

@@ -51,7 +51,6 @@ test("pipeline animates all signals, pauses, resumes and supports selection and 
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto("/pipeline");
-  await page.getByRole("button", { name: "Exit fullscreen map" }).click();
   await expect(page.getByRole("heading", { name: "Daily signal flow" })).toBeVisible();
   await expect(page.locator(".signal-readings .source-card")).toHaveCount(6);
   await expect(page.locator(".signal-chart .recharts-area-curve")).toHaveCount(6);
@@ -99,7 +98,6 @@ test("reduced motion starts paused and missing replay inputs stay missing", asyn
     await route.fulfill({ response, json: data });
   });
   await page.goto("/pipeline");
-  await page.getByRole("button", { name: "Exit fullscreen map" }).click();
   await expect(page.getByRole("button", { name: "Resume simulation" })).toBeVisible();
   await expect(page.locator(".signal-features > div").filter({ hasText: "water ratio" })).toContainText("Missing");
   const clock = page.getByLabel("Simulation time", { exact: true });
@@ -115,11 +113,10 @@ test("management can change range and signal, compare homes and drill into a rou
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto("/pipeline");
-  await page.getByRole("button", { name: "Exit fullscreen map" }).click();
   await page.getByRole("button", { name: "Pause simulation" }).click();
   await expect(page.getByRole("heading", { name: "Township usage overview" })).toBeVisible();
   await expect(page.getByRole("button", { name: "7 days", exact: true })).toHaveAttribute("aria-pressed", "true");
-  await expect(page.getByRole("button", { name: /^Inspect household/ })).toHaveCount(24);
+  await expect(page.getByRole("button", { name: /^Inspect household/ })).toHaveCount(120);
   const firstRow = page.getByRole("button", { name: /^Inspect household SG-001,/ });
   await expect(firstRow.locator(".heatmap-cell")).toHaveCount(28);
   const weeklyTotal = await page.locator(".township-summary dd").nth(1).textContent();

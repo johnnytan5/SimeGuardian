@@ -1,13 +1,17 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { BrowserRouter } from "react-router-dom";
+import { createBrowserRouter, redirect, RouterProvider } from "react-router-dom";
 import App from "./App";
+import { getRole } from "./api";
 import "./styles.css";
+
+const router = createBrowserRouter([
+  { path: "/", loader: () => redirect(getRole() === "responder" ? "/response" : "/overview") },
+  { path: "*", element: <App /> },
+]);
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
+    <RouterProvider router={router} />
   </React.StrictMode>,
 );

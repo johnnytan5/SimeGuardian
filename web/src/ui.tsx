@@ -2,6 +2,7 @@ import { useEffect, useRef, type ReactNode } from "react";
 import type { ModelVersion } from "./api";
 
 export type IconName =
+  | "menu"
   | "grid"
   | "flask"
   | "layers"
@@ -12,6 +13,7 @@ export type IconName =
   | "close"
   | "shield";
 const paths: Record<IconName, ReactNode> = {
+  menu: <path d="M4 6h16M4 12h16M4 18h16" />,
   grid: (
     <>
       <rect x="3" y="3" width="7" height="7" rx="1" />

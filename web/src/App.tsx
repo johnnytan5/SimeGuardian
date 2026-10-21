@@ -26,26 +26,28 @@ import {
   percentage,
   when,
   runName,
-  type IconName,
 } from "./ui";
-import { DashboardPages, navigation } from "./DashboardPages";
+import { DashboardPages, pages } from "./DashboardPages";
+import { DemoFlow, demoSteps } from "./DemoFlow";
 import { getRole, switchRole } from "./api";
 
 export default function App() {
   const location = useLocation();
   const navigate = useNavigate();
-  const currentPage = navigation.find((p) =>
-    p.path === "/"
-      ? location.pathname === "/"
-      : location.pathname.startsWith(p.path),
+  const currentPage = pages.find((p) =>
+    location.pathname === p.path || location.pathname.startsWith(`${p.path}/`),
   );
   const view = location.pathname.startsWith("/incidents/")
     ? "Incident trace"
     : (currentPage?.name ?? "Page not found");
   const mlopsPage =
     getRole() === "operator" &&
-    ["Training", "Evaluation", "Model registry"].includes(view);
+    ["Model training", "Evaluation", "Model registry"].includes(view);
   const role = getRole();
+  const activeStep = demoSteps.find((step) => role === "responder"
+    ? step.path === "/response"
+    : step.routes.some((route) => location.pathname === route || location.pathname.startsWith(`${route}/`)));
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [data, setData] = useState<Snapshot | null>(null);
   const [error, setError] = useState("");
   const [actionError, setActionError] = useState("");
@@ -265,7 +267,7 @@ export default function App() {
               <th>Training windows</th>
               <th>F1 score</th>
               <th>False positives</th>
-              <th>Action</th>
+              {view === "Model registry" && <th>Action</th>}
             </tr>
           </thead>
           <tbody>
@@ -321,7 +323,7 @@ export default function App() {
                 <td className="numeric">
                   {metric(version, "validation_false_positives") ?? "—"}
                 </td>
-                <td>
+                {view === "Model registry" && <td>
                   <button
                     className="text-button"
                     disabled={busy || !!error || !version.can_promote}
@@ -336,7 +338,7 @@ export default function App() {
                         ? "Promote"
                         : "Gate not passed"}
                   </button>
-                </td>
+                </td>}
               </tr>
             ))}
           </tbody>
@@ -367,11 +369,11 @@ export default function App() {
   );
 
   return (
-    <div className="workspace">
+    <div className={`workspace ${sidebarOpen ? "" : "sidebar-hidden"}`}>
       <a className="skip-link" href="#main">
         Skip to content
       </a>
-      <aside className="sidebar">
+      <aside id="workspace-sidebar" className="sidebar" hidden={!sidebarOpen}>
         <div className="brand">
           <img
             className="brand-logo"
@@ -385,24 +387,22 @@ export default function App() {
             <small>TOWNSHIP WELLBEING</small>
           </div>
         </div>
-        <div className="workspace-label">OPERATOR WORKSPACE</div>
+        <div className="workspace-label">{role === "operator" ? "DEMO JOURNEY" : "RESPONDER WORKSPACE"}</div>
         <nav aria-label="Workspace">
-          {navigation
+          {demoSteps
             .filter((item) => role === "operator" || item.path === "/response")
-            .map(({ name, path, icon, group }, i, all) => (
+            .map(({ name, path, icon }) => (
               <div key={path}>
-                {(i === 0 || all[i - 1].group !== group) && (
-                  <div className="nav-group">{group}</div>
-                )}
                 <Link
                   to={path}
-                  className={view === name ? "nav-item active" : "nav-item"}
+                  viewTransition
+                  className={activeStep?.path === path ? "nav-item active" : "nav-item"}
                   onClick={() => setSearch("")}
-                  aria-current={view === name ? "page" : undefined}
+                  aria-current={activeStep?.path === path ? "page" : undefined}
                 >
-                  <Icon name={icon as IconName} />
+                  <Icon name={icon} />
                   {name}
-                  {view === name && <span className="nav-mark" />}
+                  {activeStep?.path === path && <span className="nav-mark" />}
                 </Link>
               </div>
             ))}
@@ -430,44 +430,56 @@ export default function App() {
       </aside>
       <div className="main-shell">
         <header className="topbar">
-          <div className="breadcrumb">
-            Workspace <span>/</span> <strong>{view}</strong>
-          </div>
-          <div className="topbar-right">
-            <span className={`connection ${error ? "offline" : ""}`}>
-              <span className="small-dot" />
-              {error && mlopsPage
-                ? "Tracking needs attention"
-                : loading
-                  ? "Connecting…"
-                  : "Local prototype"}
-            </span>
-            <button
-              className="icon-button"
-              aria-label="Refresh workspace"
-              onClick={() => {
-                void load();
-                window.dispatchEvent(new Event("workspace-refresh"));
-              }}
-            >
-              <Icon name="refresh" />
-            </button>
-            <button
-              className="role-switch"
-              onClick={() => {
-                switchRole(role === "operator" ? "responder" : "operator");
-                window.location.assign(
-                  role === "operator" ? "/response" : "/demo",
-                );
-              }}
-            >
-              <span className="top-avatar">
-                {role === "operator" ? "OP" : "R1"}
+          <DemoFlow />
+          <div className="topbar-toolbar">
+            <div className="topbar-brand">
+              <button
+                className="icon-button sidebar-toggle"
+                aria-label={sidebarOpen ? "Hide sidebar" : "Show sidebar"}
+                aria-expanded={sidebarOpen}
+                aria-controls="workspace-sidebar"
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+              >
+                <Icon name={sidebarOpen ? "close" : "menu"} />
+              </button>
+              <Link to={role === "responder" ? "/response" : "/overview"} className="topbar-name">Sime<span>Guardian</span></Link>
+            </div>
+            <div className="topbar-right">
+              <span className={`connection ${error ? "offline" : ""}`}>
+                <span className="small-dot" />
+                {error && mlopsPage
+                  ? "Tracking needs attention"
+                  : loading
+                    ? "Connecting…"
+                    : "Local prototype"}
               </span>
-              {role === "operator"
-                ? "Switch to responder"
-                : "Return to operator"}
-            </button>
+              <button
+                className="icon-button"
+                aria-label="Refresh workspace"
+                onClick={() => {
+                  void load();
+                  window.dispatchEvent(new Event("workspace-refresh"));
+                }}
+              >
+                <Icon name="refresh" />
+              </button>
+              <button
+                className="role-switch"
+                onClick={() => {
+                  switchRole(role === "operator" ? "responder" : "operator");
+                  window.location.assign(
+                    role === "operator" ? "/response" : "/demo",
+                  );
+                }}
+              >
+                <span className="top-avatar">
+                  {role === "operator" ? "OP" : "R1"}
+                </span>
+                {role === "operator"
+                  ? "Switch to responder"
+                  : "Return to operator"}
+              </button>
+            </div>
           </div>
         </header>
         <main id="main">
@@ -497,6 +509,18 @@ export default function App() {
                   Train new model
                 </button>
               </div>
+              {view === "Model training" && (
+                <div className="training-tools">
+                  <Link className="text-button" to="/datasets">View training data →</Link>
+                  <details>
+                    <summary>Advanced model controls</summary>
+                    <div className="training-links">
+                      <Link className="text-button" to="/models">Model registry</Link>
+                      <Link className="text-button" to="/evaluation">Detailed evaluation</Link>
+                    </div>
+                  </details>
+                </div>
+              )}
               <div className="scope-bar">
                 <div>
                   <span className="scope-dot" />
@@ -579,7 +603,7 @@ export default function App() {
                 </div>
               )}
 
-              {view === "Evaluation" && (
+              {(view === "Model training" || view === "Evaluation") && (
                 <>
                   <div className="kpi-grid">
                     <article className="kpi">

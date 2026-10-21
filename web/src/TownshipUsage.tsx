@@ -1,7 +1,6 @@
 import { useState, type CSSProperties } from "react";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Badge } from "./ui";
-import { TownshipExplorer } from "./TownshipExplorer";
 import { formatSignal, townshipRanges, usageBand, type AnomalyDemoState, type TownshipRange, type townshipWindow } from "./signalSimulation";
 
 const hourFormat = new Intl.DateTimeFormat("en-MY", {
@@ -16,7 +15,7 @@ const stampFormat = new Intl.DateTimeFormat("en-MY", {
 
 export function TownshipUsage({
   window, range, onRange, sources, signal, onSignal, household, onHousehold,
-  paused, onPause, reducedMotion, anomaly, demo, onStartDemo, onClearDemo,
+  paused, onPause, reducedMotion, anomaly,
 }: {
   window: ReturnType<typeof townshipWindow>;
   range: TownshipRange;
@@ -30,9 +29,6 @@ export function TownshipUsage({
   onPause: () => void;
   reducedMotion: boolean;
   anomaly: AnomalyDemoState | null;
-  demo: AnomalyDemoState | null;
-  onStartDemo: () => void;
-  onClearDemo: () => void;
 }) {
   const [search, setSearch] = useState("");
   const { homes, totals } = window;
@@ -47,12 +43,6 @@ export function TownshipUsage({
 
   return (
     <>
-      <TownshipExplorer
-        window={window} range={range} onRange={onRange} signal={signal}
-        onSignal={onSignal} household={household} onHousehold={onHousehold}
-        paused={paused} anomaly={anomaly} onPause={onPause}
-        demo={demo} onStartDemo={onStartDemo} onClearDemo={onClearDemo}
-      />
       <section className="panel township-panel" aria-labelledby="township-title">
         <div className="panel-heading">
           <div>

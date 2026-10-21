@@ -17,9 +17,9 @@ test("main dashboard shows recorded metrics and evidence without an external das
   const champion = source.versions.find(
     (v: any) => v.version === source.aliases.champion,
   );
-  await page.goto("/evaluation");
+  await page.goto("/training");
   await expect(
-    page.getByRole("heading", { name: "Evaluation", exact: true }),
+    page.getByRole("heading", { name: "Model training", exact: true }),
   ).toBeVisible();
   await expect(
     page.locator(".kpi").filter({ hasText: "Validation F1" }),
@@ -34,6 +34,7 @@ test("main dashboard shows recorded metrics and evidence without an external das
   );
   await page.keyboard.press("Escape");
   await expect(page.getByRole("dialog")).not.toBeVisible();
+  await page.getByText("Advanced model controls", { exact: true }).click();
   await page.getByRole("link", { name: "Model registry", exact: true }).click();
   await page.getByRole("button", { name: "Roll back champion" }).click();
   await expect(page.getByRole("dialog")).toContainText("rollback audit record");
@@ -84,7 +85,7 @@ test("workspace stays within the viewport on an iPhone-sized screen", async ({
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/training");
   await expect(
-    page.getByRole("heading", { name: "Training", exact: true }),
+    page.getByRole("heading", { name: "Model training", exact: true }),
   ).toBeVisible();
   await expect(
     page.getByRole("button", { name: "Train new model" }),
@@ -106,6 +107,7 @@ test("registry actions run inside the dashboard and leave an audit trail", async
 }) => {
   const before = await snapshot(request);
   await page.goto("/training");
+  await page.getByText("Advanced model controls", { exact: true }).click();
   await page.getByRole("link", { name: "Model registry", exact: true }).click();
   await page.getByRole("button", { name: "Roll back champion" }).click();
   await page

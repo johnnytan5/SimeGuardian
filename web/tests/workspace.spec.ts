@@ -21,20 +21,20 @@ test("main routes and dataset drill-down survive direct navigation and refresh",
   page,
 }) => {
   const pages = [
-    ["/", "A clearer view. A better check-in."],
-    ["/pipeline", "Signal pipeline"],
+    ["/overview", "Overview"],
+    ["/pipeline", "Monitoring"],
     ["/datasets", "Datasets & lineage"],
-    ["/training", "Training"],
+    ["/training", "Model training"],
     ["/evaluation", "Evaluation"],
     ["/models", "Model registry"],
     ["/inference", "Inference & incidents"],
     ["/operations", "Operations & coverage"],
-    ["/demo", "Demo controls"],
-    ["/response", "Township response"],
+    ["/demo", "Anomaly detection"],
+    ["/response", "Rescue"],
   ];
   for (const [path, title] of pages) {
     await page.goto(path);
-    if (path === "/pipeline") await page.getByRole("button", { name: "Exit fullscreen map" }).click();
+    if (path === "/overview") await page.getByRole("button", { name: "Exit fullscreen map" }).click();
     await expect(
       page.getByRole("heading", { name: title, exact: true }),
     ).toBeVisible();
@@ -109,7 +109,7 @@ test("registered model to incident to restricted responder outcome uses persiste
       page.getByRole("heading", { name: "Your assigned check-ins" }),
     ).toBeVisible();
     await expect(
-      page.getByRole("link", { name: "Pipeline", exact: true }),
+      page.getByRole("link", { name: "Monitoring", exact: true }),
     ).toHaveCount(0);
     const headers = await session(request, "responder");
     expect((await request.get("/api/workspace", { headers })).status()).toBe(
@@ -189,9 +189,8 @@ test("workspace API failure can be retried without a broken shell", async ({
   );
   await page.unroute("**/api/workspace");
   await page.getByRole("button", { name: "Retry", exact: true }).click();
-  await page.getByRole("button", { name: "Exit fullscreen map" }).click();
   await expect(
-    page.getByRole("heading", { name: "Signal pipeline" }),
+    page.getByRole("heading", { name: "Monitoring" }),
   ).toBeVisible();
 });
 
@@ -222,7 +221,7 @@ test("run evidence and worker logs support direct links", async ({
 test("operations pages stay usable on compact screens", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   for (const path of [
-    "/",
+    "/overview",
     "/pipeline",
     "/datasets/smoke-features-v1",
     "/inference",
@@ -230,7 +229,7 @@ test("operations pages stay usable on compact screens", async ({ page }) => {
     "/demo",
   ]) {
     await page.goto(path);
-    if (path === "/pipeline") await page.getByRole("button", { name: "Exit fullscreen map" }).click();
+    if (path === "/overview") await page.getByRole("button", { name: "Exit fullscreen map" }).click();
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     expect(
       await page.evaluate(

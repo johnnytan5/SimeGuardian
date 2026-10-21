@@ -16,11 +16,12 @@ export function createTownshipScene(
   renderer.toneMappingExposure = 1;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFShadowMap;
-  renderer.setClearColor("#dfe8eb");
+  renderer.setClearColor("#e8e8ea");
   renderer.domElement.tabIndex = 0;
   renderer.domElement.setAttribute("aria-label", "Putra Heights 3D model. Drag to orbit, scroll to zoom, arrow keys to pan. Select homes using the adjacent household selector.");
   const scene = new THREE.Scene();
-  scene.fog = new THREE.Fog("#dfe8eb", 1500, 2400);
+  const fog = new THREE.Fog("#e8e8ea", 1500, 2400);
+  scene.fog = fog;
   const camera = new THREE.PerspectiveCamera(37, 1, 0.05, 3000);
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = false;
@@ -179,7 +180,7 @@ export function createTownshipScene(
     const mesh = new THREE.Mesh(geometry(vertices, new Array(vertices.length / 3 * 2).fill(0)), material(color));
     mesh.receiveShadow = true; scene.add(mesh);
   });
-  const homes = new Map<string, { position: THREE.Vector3; roof: THREE.Mesh; ring: THREE.Mesh; naturalColor: string }>();
+  const homes = new Map<string, { position: THREE.Vector3; roof: THREE.Mesh; outline: THREE.LineLoop; naturalColor: string }>();
   const plotsByBuilding = new Map(demoPlots.map((plot) => [plot.buildingId, plot]));
   const pickable: THREE.Object3D[] = [];
   const anchors: { key: string; point: THREE.Vector3; landmark: boolean }[] = [];
@@ -226,14 +227,17 @@ export function createTownshipScene(
       body.receiveShadow = roofMesh.receiveShadow = true;
       group.add(body, roofMesh);
       const [x, z] = mapPosition(plot.point);
-      const radius = Math.max(...points.map((p) => Math.hypot(p[0] - x, p[1] - z))) + 0.15;
-      const ring = new THREE.Mesh(new THREE.RingGeometry(radius, radius + 0.09, 48), material("#ffffff"));
-      ring.rotation.x = -Math.PI / 2; ring.position.set(x, top + 0.24, z);
-      group.add(ring);
+      const outline = new THREE.LineLoop(
+        new THREE.BufferGeometry().setFromPoints(points.map(([px, pz]) => new THREE.Vector3(px, top + 0.03, pz))),
+        new THREE.LineBasicMaterial({ color: "#ffffff" }),
+      );
+      group.add(outline);
       group.traverse((object) => { object.userData.household = plot.id; });
-      scene.add(group); pickable.push(group);
-      homes.set(plot.id, { position: new THREE.Vector3(x, top, z), roof: roofMesh, ring, naturalColor });
-      anchors.push({ key: plot.id, point: new THREE.Vector3(x, top + 0.5, z), landmark: false });
+      scene.add(group); pickable.push(body, roofMesh);
+      const roofLevel = top + (residential && points.length === 4 ? 0.18 : 0);
+      const position = new THREE.Vector3(x, roofLevel + 0.03, z);
+      homes.set(plot.id, { position, roof: roofMesh, outline, naturalColor });
+      anchors.push({ key: plot.id, point: position, landmark: false });
     } else {
       batch(walls, wallsMat); batch(roof, material(naturalColor));
     }
@@ -275,7 +279,7 @@ export function createTownshipScene(
   let selected = "";
   let flagged = "";
   let available = new Set<string>();
-  let showReadings = true;
+  let showReadings = false;
   let overview = true;
   let topView = true;
   let disposed = false;
@@ -293,7 +297,7 @@ export function createTownshipScene(
     renderer.render(scene, camera);
     const width = host.clientWidth, height = host.clientHeight;
     const origin = host.getBoundingClientRect();
-    const occupied = Array.from(host.closest("dialog")!.querySelectorAll<HTMLElement>(".explorer-float:not([hidden])")).map((panel) => {
+    const occupied = Array.from(host.closest("dialog")!.querySelectorAll<HTMLElement>("[data-map-obstacle]")).filter((panel) => panel.checkVisibility()).map((panel) => {
       const rect = panel.getBoundingClientRect();
       return { x: rect.left - origin.left, y: rect.top - origin.top, width: rect.width, height: rect.height };
     });
@@ -311,7 +315,7 @@ export function createTownshipScene(
       if (!inFrame) continue;
       el.style.transform = anchor.landmark ? `translate(${x}px, ${y}px) translate(-50%, -100%)` : `translate(${x - 7}px, ${y - 7}px)`;
       el.style.zIndex = anchor.key === flagged ? "6" : anchor.key === selected ? "5" : anchor.landmark ? "1" : "2";
-      const labelWidth = anchor.landmark ? Math.max(130, el.offsetWidth) : 126, labelHeight = anchor.landmark ? 24 : 76;
+      const labelWidth = anchor.landmark ? Math.max(130, el.offsetWidth) : 140, labelHeight = anchor.landmark ? 24 : 91;
       let placement: { x: number; y: number; width: number; height: number } | undefined;
       const show = anchor.landmark || showReadings || anchor.key === selected || anchor.key === flagged;
       // Fan out dense household cards with leaders; their dots stay on the actual footprints.
@@ -320,9 +324,9 @@ export function createTownshipScene(
         for (let dx = -radius; dx <= radius; dx++) for (let dy = -radius; dy <= radius; dy++) {
           if (Math.max(Math.abs(dx), Math.abs(dy)) === radius) candidates.push({ dx, dy });
         }
-        candidates.sort((a, b) => Math.hypot(a.dx * 138, a.dy * 88) - Math.hypot(b.dx * 138, b.dy * 88));
+        candidates.sort((a, b) => Math.hypot(a.dx * 152, a.dy * 103) - Math.hypot(b.dx * 152, b.dy * 103));
         for (const { dx, dy } of candidates) {
-          const rect = { x: x - labelWidth / 2 + dx * 138, y: y - labelHeight - 14 + dy * 88, width: labelWidth, height: labelHeight };
+          const rect = { x: x - labelWidth / 2 + dx * 152, y: y - labelHeight - 14 + dy * 103, width: labelWidth, height: labelHeight };
           if (rect.x < 14 || rect.x + rect.width > width - 14 || rect.y < 94 || rect.y + rect.height > height - 85) continue;
           if (occupied.some((r) => rect.x < r.x + r.width + 7 && rect.x + rect.width + 7 > r.x && rect.y < r.y + r.height + 7 && rect.y + rect.height + 7 > r.y)) continue;
           placement = rect; break;
@@ -348,21 +352,53 @@ export function createTownshipScene(
     }
   };
   const invalidate = () => { if (!frame && !disposed) frame = requestAnimationFrame(render); };
+  const frameArea = () => {
+    const viewport = host.getBoundingClientRect();
+    const root = host.closest("dialog")!;
+    const bounds = { left: 20, right: viewport.width - 20, top: 85, bottom: viewport.height - 75 };
+    const rect = (selector: string) => {
+      const element = root.querySelector<HTMLElement>(selector);
+      return element?.checkVisibility() ? element.getBoundingClientRect() : null;
+    };
+    const options = rect(".explorer-map-options");
+    if (options) bounds.top = options.bottom - viewport.top + 16;
+    const trend = rect(".explorer-trends");
+    if (trend) bounds.bottom = trend.top - viewport.top - 20;
+    if (viewport.width > 1000) {
+      const left = rect(".explorer-left"), right = rect(".explorer-inspector");
+      if (left) bounds.left = left.right - viewport.left + 16;
+      if (right) bounds.right = right.left - viewport.left - 16;
+    }
+    // Keep the township centered in the open map area between the floating controls.
+    camera.setViewOffset(viewport.width, viewport.height,
+      viewport.width / 2 - (bounds.left + bounds.right) / 2,
+      viewport.height / 2 - (bounds.top + bounds.bottom) / 2,
+      viewport.width, viewport.height);
+    return { viewport, bounds };
+  };
   const reset = (top = true) => {
     overview = true; topView = top;
+    scene.fog = top ? null : fog;
     controls.enableRotate = !top;
     controls.mouseButtons.LEFT = top ? THREE.MOUSE.PAN : THREE.MOUSE.ROTATE;
     controls.touches.ONE = top ? THREE.TOUCH.PAN : THREE.TOUCH.ROTATE;
     controls.touches.TWO = top ? THREE.TOUCH.DOLLY_PAN : THREE.TOUCH.DOLLY_ROTATE;
-    controls.target.set(0, 3, 0);
-    const direction = new THREE.Vector3(top ? 0 : 170, top ? 240 : 185, top ? 0.1 : 180).normalize();
-    const corners = [-width / 2, width / 2].flatMap((x) => [0, 25].flatMap((y) => [-depth / 2, depth / 2].map((z) => new THREE.Vector3(x, y, z))));
+    renderer.domElement.setAttribute("aria-label", `Putra Heights 3D model. ${top ? "Landscape top view, north points right. Drag to pan" : "Drag to orbit"}, scroll to zoom, arrow keys to pan. Select homes using the adjacent household selector.`);
+    const monitoredBounds = new THREE.Box3().setFromPoints(anchors.filter((anchor) => !anchor.landmark).map((anchor) => anchor.point)).expandByScalar(16);
+    monitoredBounds.getCenter(controls.target);
+    const { viewport, bounds } = frameArea();
+    // Face west in top view so the township's north–south axis runs across the screen.
+    const direction = new THREE.Vector3(top ? 0.1 : 170, top ? 240 : 185, top ? 0 : 180).normalize();
+    const corners = [monitoredBounds.min.x, monitoredBounds.max.x].flatMap((x) =>
+      [monitoredBounds.min.y, monitoredBounds.max.y].flatMap((y) =>
+        [monitoredBounds.min.z, monitoredBounds.max.z].map((z) => new THREE.Vector3(x, y, z))));
     for (let distance = 600; distance <= 1980; distance += 30) {
-      camera.position.copy(direction).multiplyScalar(distance);
+      camera.position.copy(direction).multiplyScalar(distance).add(controls.target);
       controls.update(); camera.updateMatrixWorld();
       if (corners.every((corner) => {
         const p = corner.clone().project(camera);
-        return Math.abs(p.x) < 0.93 && Math.abs(p.y) < 0.86;
+        const x = (p.x + 1) / 2 * viewport.width, y = (1 - p.y) / 2 * viewport.height;
+        return x > bounds.left && x < bounds.right && y > bounds.top && y < bounds.bottom;
       })) break;
     }
     invalidate();
@@ -374,12 +410,14 @@ export function createTownshipScene(
     camera.updateProjectionMatrix();
     renderer.setSize(width, height);
     if (overview) reset(topView);
+    else frameArea();
     invalidate();
   };
   controls.addEventListener("start", () => { overview = false; });
   controls.addEventListener("change", invalidate);
   const observer = new ResizeObserver(resize);
   observer.observe(host);
+  host.closest("dialog")!.querySelectorAll("[data-map-obstacle]").forEach((element) => observer.observe(element));
   const intersection = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; if (visible) invalidate(); });
   intersection.observe(host);
   document.addEventListener("visibilitychange", invalidate);
@@ -415,7 +453,7 @@ export function createTownshipScene(
       if (!home) return;
       overview = false;
       controls.target.copy(home.position);
-      camera.position.copy(home.position).add(topView ? new THREE.Vector3(0, 18, 0.01) : new THREE.Vector3(3.7, 4.5, 5));
+      camera.position.copy(home.position).add(topView ? new THREE.Vector3(0.01, 18, 0) : new THREE.Vector3(3.7, 4.5, 5));
       controls.update(); invalidate();
     },
     update: (values: Map<string, string>, household: string, readings: boolean, concern: string | undefined) => {
@@ -426,8 +464,8 @@ export function createTownshipScene(
         roofMaterial.color.set(id === flagged ? "#bd334d" : value ?? home.naturalColor);
         roofMaterial.emissive.set(id === flagged ? "#bd334d" : "#000000");
         roofMaterial.emissiveIntensity = 0.2;
-        home.ring.visible = value !== undefined;
-        home.ring.material = material(id === concern ? "#bd334d" : id === household ? "#2c5b42" : "#ffffff");
+        home.outline.visible = value !== undefined;
+        (home.outline.material as THREE.LineBasicMaterial).color.set(id === concern ? "#bd334d" : id === household ? "#231f20" : "#ffffff");
       });
       invalidate();
     },
@@ -442,7 +480,7 @@ export function createTownshipScene(
       const geometries = new Set<THREE.BufferGeometry>();
       const usedMaterials = new Set<THREE.Material>();
       scene.traverse((object) => {
-        if (object instanceof THREE.Mesh) {
+        if (object instanceof THREE.Mesh || object instanceof THREE.Line) {
           geometries.add(object.geometry);
           (Array.isArray(object.material) ? object.material : [object.material]).forEach((m) => usedMaterials.add(m));
           if (object instanceof THREE.InstancedMesh) object.dispose();

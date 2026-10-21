@@ -60,8 +60,10 @@ def test_family_ack_keeps_incident_open_and_stops_unsent_stages(tmp_path):
 
 def test_source_fixture_is_deterministic_and_preserves_sparse_attribution():
     records = workspace.raw_fixture()
-    assert len(records) == 4704
-    assert len({record["household"] for record in records}) == 24
+    assert len(records) == 23520
+    assert {record["household"] for record in records} == {f"SG-{i:03}" for i in range(1, 121)}
+    dataset = workspace.dataset_detail("township-ui-v1")
+    assert len(dataset["households"]) == dataset["splits"][0]["households"] == 120
     assert {record["source"] for record in records} == set(workspace.SOURCES)
     assert all(math.isfinite(record["value"]) and record["unit"] == workspace.SOURCES[record["source"]][1] for record in records)
     assert workspace.manifest(records) == workspace.manifest(workspace.raw_fixture())

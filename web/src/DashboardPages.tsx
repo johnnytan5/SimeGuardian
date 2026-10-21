@@ -32,54 +32,20 @@ import {
   type AnomalyDemoState,
 } from "./signalSimulation";
 import { TownshipUsage } from "./TownshipUsage";
+import { TownshipExplorer } from "./TownshipExplorer";
 import { AnomalyDemo } from "./AnomalyDemo";
 
-export const navigation = [
-  { name: "Overview", path: "/", icon: "grid", group: "MONITOR" },
-  { name: "Pipeline", path: "/pipeline", icon: "layers", group: "MONITOR" },
-  {
-    name: "Inference & incidents",
-    path: "/inference",
-    icon: "shield",
-    group: "MONITOR",
-  },
-  {
-    name: "Datasets",
-    path: "/datasets",
-    icon: "layers",
-    group: "DATA & MODELS",
-  },
-  {
-    name: "Training",
-    path: "/training",
-    icon: "flask",
-    group: "DATA & MODELS",
-  },
-  {
-    name: "Evaluation",
-    path: "/evaluation",
-    icon: "grid",
-    group: "DATA & MODELS",
-  },
-  {
-    name: "Model registry",
-    path: "/models",
-    icon: "layers",
-    group: "DATA & MODELS",
-  },
-  {
-    name: "Operations",
-    path: "/operations",
-    icon: "clock",
-    group: "WORKSPACE",
-  },
-  { name: "Demo controls", path: "/demo", icon: "flask", group: "WORKSPACE" },
-  {
-    name: "Township response",
-    path: "/response",
-    icon: "shield",
-    group: "WORKSPACE",
-  },
+export const pages = [
+  { name: "Overview", path: "/overview" },
+  { name: "Monitoring", path: "/pipeline" },
+  { name: "Inference & incidents", path: "/inference" },
+  { name: "Datasets", path: "/datasets" },
+  { name: "Model training", path: "/training" },
+  { name: "Evaluation", path: "/evaluation" },
+  { name: "Model registry", path: "/models" },
+  { name: "Operations", path: "/operations" },
+  { name: "Anomaly detection", path: "/demo" },
+  { name: "Rescue", path: "/response" },
 ];
 type Event = { at: number; name: string; actor: string };
 type Incident = {
@@ -404,10 +370,8 @@ function OperatorPages({
           </button>
         </div>
       )}
-      {pathname === "/" ? (
-        <Overview {...props} />
-      ) : pathname === "/pipeline" ? (
-        <Pipeline {...props} />
+      {pathname === "/overview" || pathname === "/pipeline" ? (
+        <Pipeline {...props} overview={pathname === "/overview"} />
       ) : pathname === "/datasets" ? (
         <Datasets data={data} />
       ) : pathname.startsWith("/datasets/") ? (
@@ -423,7 +387,7 @@ function OperatorPages({
       ) : pathname === "/response" ? (
         <>
           <Heading
-            title="Township response"
+            title="Rescue"
             copy="A separate, restricted view for assigned check-ins."
           />
           <Panel title="Open the responder workspace">
@@ -439,8 +403,8 @@ function OperatorPages({
             title="Page not found"
             copy="This address is not part of the dashboard."
           />
-          <Link className="button secondary" to="/">
-            Return to overview
+          <Link className="button secondary" to="/pipeline">
+            Return to monitoring
           </Link>
         </>
       )}
@@ -473,247 +437,8 @@ function ReplayBar({ data }: { data: Workspace }) {
   );
 }
 
-function Overview({ data, models }: PageProps) {
-  const [search, setSearch] = useState("");
-  const incident = data.state.incident;
-  const open = incident?.status === "open" ? 1 : 0;
-  const active = data.sources.filter(
-    (source) => source.status === "available",
-  ).length;
-  const homes = Array.from(
-    { length: data.households },
-    (_, i) => `SG-${String(i + 1).padStart(3, "0")}`,
-  ).filter((home) => home.toLowerCase().includes(search.toLowerCase()));
-  return (
-    <>
-      <Heading
-        title="A clearer view. A better check-in."
-        copy="Follow the signals, understand the concern, and keep people in the loop."
-      >
-        <Link to="/demo" className="button primary">
-          Run a demo <Icon name="arrow" size={16} />
-        </Link>
-      </Heading>
-      <ReplayBar data={data} />
-      <div className="kpi-grid">
-        <Kpi
-          title="Synthetic households"
-          value={data.households}
-          copy="Development fixture · no real residents"
-        />
-        <Kpi
-          title="Open incidents"
-          value={open}
-          copy={
-            open ? "Follow-up is required" : "No open incident in this replay"
-          }
-        />
-        <Kpi
-          title="Source availability"
-          value={
-            <>
-              {active}
-              <span className="kpi-unit">/ 6</span>
-            </>
-          }
-          copy="Simulated feed checks · not live integrations"
-        />
-        <Kpi
-          title="Champion model"
-          value={models?.aliases.champion ? `v${models.aliases.champion}` : "—"}
-          copy={
-            models
-              ? `${models.versions.length} actual registered versions`
-              : "MLflow evidence unavailable"
-          }
-        />
-      </div>
-      <div className="overview-grid">
-        <Panel
-          title="Attention & follow-through"
-          copy="A concern starts a check-in. It does not establish a health outcome."
-          action={
-            <Link to="/inference" className="text-button">
-              View trace →
-            </Link>
-          }
-        >
-          {incident ? (
-            <div className="attention-card">
-              <div className="attention-symbol">
-                <Icon name="shield" size={25} />
-              </div>
-              <div>
-                <Badge tone={open ? "orange" : "green"}>
-                  {label(incident.status)}
-                </Badge>
-                <h3>{incident.household} · wellbeing check-in</h3>
-                <p>
-                  {incident.owner
-                    ? `Follow-up owner: ${incident.owner}`
-                    : "Awaiting a person to take responsibility"}
-                </p>
-                <Link to={`/incidents/${incident.id}`} className="text-button">
-                  {incident.id} <Icon name="arrow" size={14} />
-                </Link>
-              </div>
-            </div>
-          ) : (
-            <Empty
-              title="No incident recorded yet"
-              copy="Load “Quiet household” and run inference to trace a concern from the registered model to a simulated family notification."
-            >
-              <Link to="/demo" className="text-button">
-                Open demo controls →
-              </Link>
-            </Empty>
-          )}
-          <div className="response-path">
-            <div>
-              <span>01</span>
-              <strong>Family first</strong>
-              <small>At notification creation</small>
-            </div>
-            <Icon name="arrow" />
-            <div>
-              <span>02</span>
-              <strong>Resident</strong>
-              <small>After 5 unanswered minutes</small>
-            </div>
-            <Icon name="arrow" />
-            <div>
-              <span>03</span>
-              <strong>Township</strong>
-              <small>After 10 unanswered minutes</small>
-            </div>
-          </div>
-        </Panel>
-        <Panel
-          title="From evidence to action"
-          copy="One workspace for the whole prototype."
-          className="journey-panel"
-        >
-          {[
-            [
-              "/pipeline",
-              "Six signal sources",
-              "Inspect freshness and source coverage",
-              "layers",
-            ],
-            [
-              "/training",
-              "Models that leave evidence",
-              "Train, compare and trace real MLflow runs",
-              "flask",
-            ],
-            [
-              "/inference",
-              "Explain each check-in",
-              "See model score, policy and response",
-              "shield",
-            ],
-          ].map(([path, title, copy, icon]) => (
-            <Link key={path} to={path} className="journey-link">
-              <span className="journey-icon">
-                <Icon name={icon as "layers"} />
-              </span>
-              <span>
-                <strong>{title}</strong>
-                <small>{copy}</small>
-              </span>
-              <Icon name="arrow" size={16} />
-            </Link>
-          ))}
-          <div className="privacy-note">
-            <Icon name="shield" />
-            <p>
-              Opt-in wellbeing monitoring.
-              <br />
-              No new resident hardware required.
-            </p>
-          </div>
-        </Panel>
-      </div>
-      <Panel
-        title="Household directory"
-        copy="Synthetic identifiers only · rows outside SG-001 are source-explorer fixtures."
-        action={
-          <label className="search">
-            <Icon name="grid" size={15} />
-            <input
-              aria-label="Search households"
-              placeholder="Find a household…"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </label>
-        }
-      >
-        <div className="table-scroll">
-          <table>
-            <thead>
-              <tr>
-                <th>Household</th>
-                <th>Workspace status</th>
-                <th>Monitoring scope</th>
-                <th>Next step</th>
-              </tr>
-            </thead>
-            <tbody>
-              {homes.slice(0, 8).map((home) => (
-                <tr key={home}>
-                  <td>
-                    <strong>{home}</strong>
-                    <small className="cell-note">Synthetic household</small>
-                  </td>
-                  <td>
-                    <Badge
-                      tone={home === "SG-001" && open ? "orange" : "neutral"}
-                    >
-                      {home === "SG-001"
-                        ? open
-                          ? "Check-in open"
-                          : data.state.scenario === "away"
-                            ? "Away · new alerts paused"
-                            : "Replay selected"
-                        : "Explorer fixture"}
-                    </Badge>
-                  </td>
-                  <td>
-                    {home === "SG-001"
-                      ? "Current scenario window"
-                      : "Source preview only"}
-                  </td>
-                  <td>
-                    <Link
-                      className="text-button"
-                      to={
-                        home === "SG-001"
-                          ? "/inference"
-                          : `/datasets/township-ui-v1?household=${home}`
-                      }
-                    >
-                      Inspect →
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        {!homes.length && (
-          <p className="empty">No households match your search.</p>
-        )}
-        <div className="panel-footer">
-          Showing {Math.min(8, homes.length)} of {homes.length} matches ·
-          explore all households in Datasets
-        </div>
-      </Panel>
-    </>
-  );
-}
-
-function Pipeline({ data }: PageProps) {
+function Pipeline({ data, overview }: PageProps & { overview: boolean }) {
+  const { hash } = useLocation();
   const [selected, setSelected] = useState("electricity");
   const [household, setHousehold] = useState("SG-001");
   const [range, setRange] = useState<TownshipRange>("week");
@@ -724,6 +449,11 @@ function Pipeline({ data }: PageProps) {
   const [paused, setPaused] = useState(reducedMotion);
   const [start] = useState(data.clock);
   const [frame, setFrame] = useState(0);
+  useEffect(() => {
+    if (!overview && hash === "#household-signals") {
+      document.getElementById("household-signals")?.scrollIntoView({ block: "start" });
+    }
+  }, [overview, hash]);
   useEffect(() => {
     const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
     const change = () => {
@@ -775,12 +505,31 @@ function Pipeline({ data }: PageProps) {
   const latest = signals[signals.length - 1];
   const source = data.sources.find((item) => item.id === selected)!;
   const count = data.sources.reduce((total, item) => total + item.count, 0);
+  if (overview) return (
+    <>
+      <Heading
+        title="Overview"
+        copy="Township usage, household locations and detected demo concerns in one view."
+      >
+        <Link className="button secondary" to="/pipeline">View monitoring <Icon name="arrow" size={16} /></Link>
+      </Heading>
+      <TownshipExplorer
+        window={township} range={range} onRange={setRange} signal={selected}
+        onSignal={setSelected} household={household} onHousehold={chooseHousehold}
+        paused={paused} onPause={() => setPaused((current) => !current)}
+        anomaly={detected ? demo : null} demo={demo}
+        onStartDemo={startDemo} onClearDemo={() => setDemo(null)}
+      />
+    </>
+  );
   return (
     <>
       <Heading
-        title="Signal pipeline"
-        copy="See township-wide usage, compare household routines and inspect the signals behind each home."
-      />
+        title="Monitoring"
+        copy="Compare household routines and inspect the six signals behind each home."
+      >
+        <Link className="button secondary" to="/overview">Township overview <Icon name="arrow" size={16} /></Link>
+      </Heading>
       <ReplayBar data={data} />
       <AnomalyDemo
         demo={demo}
@@ -806,9 +555,6 @@ function Pipeline({ data }: PageProps) {
         onPause={() => setPaused((current) => !current)}
         reducedMotion={reducedMotion}
         anomaly={detected ? demo : null}
-        demo={demo}
-        onStartDemo={startDemo}
-        onClearDemo={() => setDemo(null)}
       />
       <div id="household-signals" className="household-anchor">
       <Panel
@@ -1915,7 +1661,7 @@ function Demo({ data, act, busy }: PageProps) {
   return (
     <>
       <Heading
-        title="Demo controls"
+        title="Anomaly detection"
         copy="A repeatable walkthrough with one shared clock and real model evidence."
       />
       <ReplayBar data={data} />

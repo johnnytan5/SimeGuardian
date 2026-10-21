@@ -11,6 +11,7 @@ import uuid
 from app.pipeline.mlflow_demo import FEATURES, checksum, fixture
 
 BASE_TIME = 1792371600000  # 19 Oct 2026, 09:00 MYT
+UI_HOUSEHOLDS = 120
 SOURCES = {
     "electricity": ("Electricity", "kWh"), "water": ("Water", "litres"),
     "parking": ("Parking / car plate", "event"), "mall": ("Mall activity", "event"),
@@ -139,7 +140,7 @@ def mutate(directory, expected_revision, action, **parameters):
 def raw_fixture():
     rng = random.Random(42)
     records = []
-    for home in range(1, 25):
+    for home in range(1, UI_HOUSEHOLDS + 1):
         household = f"SG-{home:03}"
         for slot in range(96):
             at = BASE_TIME - (95 - slot) * 900_000
@@ -165,7 +166,7 @@ def dataset_detail(identifier):
         return {"id": identifier, "name": "Six-source UI fixture", "seed": 42, "checksum": manifest(records),
             "scope": "Development source records for the explorer. Not the training pipeline or a measured resident history.",
             "households": sorted({r["household"] for r in records}), "records": records, "count": len(records),
-            "splits": [{"name": "UI preview only", "households": 24, "windows": len(records)}],
+            "splits": [{"name": "UI preview only", "households": UI_HOUSEHOLDS, "windows": len(records)}],
             "features": [], "test_status": "No test partition generated", "labels": "No clinical or episode labels"}
     if identifier != "smoke-features-v1":
         return None
@@ -200,7 +201,7 @@ def snapshot(directory):
                      for name in ("smoke-features-v1", "township-ui-v1")],
         "scenarios": [{"id": key, "name": value[0]} for key, value in SCENARIOS.items()],
         "features": dict(zip(FEATURES, SCENARIOS[state["scenario"]][1])),
-        "coverage": SCENARIOS[state["scenario"]][2], "households": 24,
+        "coverage": SCENARIOS[state["scenario"]][2], "households": UI_HOUSEHOLDS,
         "scope": "local-synthetic-replay", "transport": "No iOS delivery transport connected"}
 
 

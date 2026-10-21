@@ -96,7 +96,7 @@ MLFLOW_DISABLE_TELEMETRY=true uv run --locked uvicorn app.main:app --host 127.0.
 
 Open [SimeGuardian](http://127.0.0.1:8000). FastAPI serves the built frontend and its API at the same origin.
 
-For frontend and backend development, install the dependencies above and run `make dev` from the repository root. This starts Vite at [127.0.0.1:5173](http://127.0.0.1:5173) and FastAPI at port 8000 with hot reload. Vite proxies `/api` to FastAPI. Press Ctrl+C to stop both. The MLflow tracking service still needs to be started separately using the runbook above.
+For local development, install the dependencies above and run `make dev` from the repository root. This starts Vite at [127.0.0.1:5173](http://127.0.0.1:5173), FastAPI at port 8000 with hot reload, and MLflow at [127.0.0.1:5050](http://127.0.0.1:5050). Vite proxies `/api` to FastAPI. MLflow uses the existing tracking database and artifacts in `artifacts/mlflow/`. Press Ctrl+C to stop all three. To run only the tracking service, use `make dev-mlflow`.
 
 This is a loopback-only synthetic demo. Operator and responder sessions have different server-enforced scopes, but freely selecting these local identities is not production account authentication. Training creates a candidate; promotion is explicit and quality-gated. The next explicit replay inference resolves the selected numeric champion; no production inference service or phone transport is connected.
 

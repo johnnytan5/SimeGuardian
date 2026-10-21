@@ -46,7 +46,6 @@ test("anomaly walkthrough animates, pauses, flags the selected home and clears w
   });
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto("/pipeline");
-  await page.getByRole("button", { name: "Exit fullscreen map" }).click();
   await page.getByLabel("Household", { exact: true }).selectOption("SG-012");
   await page.getByRole("button", { name: "Run anomaly demo", exact: true }).click();
   await expect(page.getByRole("button", { name: "Demo in progress", exact: true })).toBeDisabled();
@@ -89,7 +88,6 @@ test("anomaly walkthrough animates, pauses, flags the selected home and clears w
 test("reduced-motion demo advances without effects and switching homes cancels it", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/pipeline");
-  await page.getByRole("button", { name: "Exit fullscreen map" }).click();
   await page.getByRole("button", { name: "Run anomaly demo", exact: true }).click();
   await expect(page.locator(".anomaly-demo")).not.toHaveClass(/animating/);
   await expect(page.getByRole("heading", { name: "Demo anomaly detected", exact: true })).toBeVisible({ timeout: 15000 });

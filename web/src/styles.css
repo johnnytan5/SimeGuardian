@@ -1,6 +1,7 @@
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;450;500;550;600;650;700&display=swap");
 
 :root {
+  --demo-nav-height: 64px;
   font-family:
     "DM Sans",
     -apple-system,
@@ -106,6 +107,13 @@ svg {
 .workspace {
   display: flex;
   min-height: 100vh;
+}
+.workspace.sidebar-hidden .main-shell {
+  margin-left: 0;
+  width: 100%;
+}
+.sidebar[hidden] {
+  display: none;
 }
 .sidebar {
   width: 236px;
@@ -256,13 +264,18 @@ svg {
   margin-left: 236px;
 }
 .topbar {
-  height: 75px;
+  background: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 9;
+}
+.topbar-toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #fff;
+  height: 72px;
+  padding: 0 24px;
   border-bottom: 1px solid #e9e9ed;
-  padding: 0 38px;
 }
 .breadcrumb {
   font-size: 11px;
@@ -280,6 +293,130 @@ svg {
   display: flex;
   align-items: center;
   gap: 19px;
+}
+.topbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.topbar-name {
+  color: #231f20;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.6px;
+}
+.topbar-name span {
+  color: #d71920;
+}
+.sidebar-toggle {
+  flex-shrink: 0;
+}
+.demo-flow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  width: 100%;
+  height: var(--demo-nav-height);
+  padding: 6px 16px;
+  border-bottom: 1px solid #e9e9ed;
+  background: #fff;
+  font-family: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+.demo-flow ol {
+  view-transition-name: phase-nav;
+  width: 100%;
+  max-width: 1050px;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 8px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.demo-step {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 44px;
+  padding: 7px 10px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  color: #66616b;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.35;
+  text-decoration: none;
+}
+a.demo-step:hover {
+  background: #f9f6f6;
+}
+.demo-step[aria-current="step"] {
+  color: #b5151b;
+}
+.demo-step-indicator {
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  background: #fff1f1;
+  border: 1px solid #f1d7d7;
+  border-radius: inherit;
+  view-transition-name: phase-indicator;
+}
+.demo-step-number {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 25px;
+  height: 25px;
+  border: 1px solid #dfdce1;
+  border-radius: 50%;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+[aria-current="step"] .demo-step-number {
+  view-transition-name: phase-number;
+  color: #fff;
+  background: #d71920;
+  border-color: #d71920;
+}
+.demo-step[aria-disabled="true"] {
+  color: #99939c;
+}
+/* The fullscreen dialog covers the shell's second copy of the navigation. */
+:root:has(.township-explorer:modal) .topbar :is(.demo-flow ol, .demo-step-indicator, .demo-step-number) {
+  view-transition-name: none;
+}
+::view-transition-group(*) {
+  animation-duration: 360ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+::view-transition-group(root) { z-index: 0; }
+::view-transition-group(phase-indicator) { z-index: 1; }
+::view-transition-group(phase-nav) { z-index: 2; }
+::view-transition-group(phase-number) { z-index: 3; }
+::view-transition-old(phase-nav) {
+  display: none;
+}
+::view-transition-new(phase-nav) {
+  animation: none;
+}
+::view-transition-old(root) {
+  animation: phase-exit 220ms ease both;
+}
+::view-transition-new(root) {
+  animation: phase-enter 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes phase-exit {
+  to { opacity: 0; }
+}
+@keyframes phase-enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 .connection {
   font-size: 10px;
@@ -345,6 +482,24 @@ main {
   font-size: 12px;
   color: #908996;
   margin-top: 10px;
+}
+.training-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 12px 24px;
+  margin-bottom: 20px;
+  font-size: 11px;
+}
+.training-tools summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+.training-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 12px;
 }
 .button {
   display: inline-flex;
@@ -1123,9 +1278,6 @@ input[type="checkbox"] {
   main {
     padding: 28px 24px 15px;
   }
-  .topbar {
-    padding: 0 24px;
-  }
   .analysis-grid {
     grid-template-columns: minmax(0, 1.5fr) minmax(260px, 1fr);
   }
@@ -1271,10 +1423,6 @@ input[type="checkbox"] {
   .main-shell {
     margin-left: 0;
     width: 100%;
-  }
-  .topbar {
-    height: 50px;
-    padding: 0 18px;
   }
   .breadcrumb {
     font-size: 9px;
@@ -1465,6 +1613,11 @@ input[type="checkbox"] {
     animation-duration: 0.01ms !important;
     transition: none !important;
   }
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
 }
 
 /* Evidence and controls stay readable at compact sizes. */
@@ -1630,12 +1783,6 @@ textarea:focus-visible {
   min-height: 120px;
   padding-bottom: 14px;
   gap: 3px;
-}
-.nav-group {
-  font-size: 9px;
-  color: #77717d;
-  letter-spacing: 1.4px;
-  padding: 18px 14px 7px;
 }
 .nav-item {
   font-size: 12px;
@@ -2831,19 +2978,6 @@ select {
   }
 }
 @media (max-width: 950px) {
-  .sidebar nav {
-    flex-direction: row;
-    overflow-x: auto;
-    overflow-y: hidden;
-    min-height: 0;
-    padding: 0;
-  }
-  .sidebar nav > div {
-    flex-shrink: 0;
-  }
-  .nav-group {
-    display: none;
-  }
   .sidebar-note {
     display: none;
   }
@@ -2855,16 +2989,45 @@ select {
   }
 }
 @media (max-width: 680px) {
-  .topbar {
-    flex-wrap: wrap;
-    height: auto;
-    min-height: 75px;
-    gap: 6px;
-    padding-top: 10px;
-    padding-bottom: 10px;
+  :root {
+    --demo-nav-height: 80px;
+  }
+  .topbar-toolbar {
+    padding: 0 18px;
   }
   .topbar-right {
     gap: 9px;
+  }
+  .topbar-right .connection {
+    display: none;
+  }
+  .topbar-brand {
+    gap: 5px;
+  }
+  .topbar-name {
+    font-size: 13px;
+  }
+  .demo-flow ol {
+    gap: 4px;
+  }
+  .demo-step {
+    flex-direction: column;
+    gap: 4px;
+    height: 64px;
+    padding: 6px 3px;
+    font-size: 10px;
+    text-align: center;
+  }
+  .demo-step > span:last-child {
+    height: 27px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .demo-step-number {
+    width: 20px;
+    height: 20px;
+    font-size: 10px;
   }
   .role-switch {
     font-size: 10px;
@@ -2874,6 +3037,11 @@ select {
   }
   .sidebar nav .nav-item {
     padding: 10px 12px;
+  }
+  .sidebar nav {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    min-height: 0;
   }
   .two-column,
   .dataset-grid {

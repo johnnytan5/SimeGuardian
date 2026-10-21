@@ -79,7 +79,7 @@ for id, way in ways.items():
     if closed and (t.get('landuse') or t.get('natural') in ['water', 'wood', 'scrub', 'grassland', 'heath'] or t.get('leisure') in ['park', 'pitch', 'playground', 'garden', 'swimming_pool']):
         areas.append({'id': id, 'kind': t.get('natural') or t.get('leisure') or t.get('landuse'), 'points': points[:-1]})
 
-# The 24 IDs remain synthetic meter overlays, not resident identities or property addresses.
+# Preserve the original 24 household assignments before extending demo coverage.
 clusters = [('The Glades', [101.5750,3.0108]), ('Putra Murni', [101.5757,3.0170]), ('Putra Bahagia', [101.5693,2.9990]), ('Putra Mahkota', [101.5699,2.9925]), ('Putra Indah', [101.5654,2.9900]), ('Putra Harmoni', [101.5820,3.0070])]
 plots = []
 def distance(a,b): return math.hypot((a[0]-b[0])*111167, (a[1]-b[1])*111320)
@@ -93,6 +93,30 @@ for zone, target in clusters:
         count += 1
         if count == 4: break
 assert len(plots) == 24 and len({p['buildingId'] for p in plots}) == 24
+
+def in_polygon(point, polygon):
+    x, y = point
+    result = False
+    for a, b in zip(polygon, polygon[1:] + polygon[:1]):
+        if (a[1] > y) != (b[1] > y) and x < a[0] + (y-a[1]) * (b[0]-a[0]) / (b[1]-a[1]):
+            result = not result
+    return result
+
+# Spread additional roof anchors through each neighbourhood, rather than stacking adjacent dots.
+roofs = [(b, center(b['points'])) for b in candidates if b['height'] < 15]
+roofs = [(b, point) for b, point in roofs if in_polygon(point, b['points']) and in_polygon(point, boundary)]
+for zone, target in clusters:
+    nearby = [(b, point) for b, point in roofs if distance(point, target) < 650
+              and min(clusters, key=lambda cluster: distance(point, cluster[1]))[0] == zone]
+    for _ in range(16):
+        used = {p['buildingId'] for p in plots}
+        available = [(b, point) for b, point in nearby if b['id'] not in used]
+        assert available, f'Not enough mapped residential roofs in {zone}'
+        b, point = max(available, key=lambda item: (min(distance(item[1], p['point']) for p in plots), -item[0]['id']))
+        assert min(distance(point, p['point']) for p in plots) > 30
+        plots.append({'id': f'SG-{len(plots)+1:03}', 'zone': zone, 'point': point, 'buildingId': b['id']})
+assert len(plots) == 120 and len({p['buildingId'] for p in plots}) == 120
+assert all(in_polygon(p['point'], next(b['points'] for b in buildings if b['id'] == p['buildingId'])) for p in plots)
 
 landmark_sources = [('The Glades',1254607330),('The Glades Plaza',1254607329),('Subang Alam LRT',424882052),('Alam Megah LRT',407156831),('Serasi Residences',1511293419),('Kingsley International School',824734088),('Masjid Putra Heights',900231661),('Putra Heights LRT',401169425),('Community Park',874595014),('Damayan Residences',1508423536)]
 landmarks = [{'name': name,'point': center(geometry(ways[id])),'sourceId': id} for name,id in landmark_sources]
@@ -119,4 +143,4 @@ metadata += 'export const landmarks: Landmark[] = '+json.dumps(landmarks,indent=
 metadata += f'export const mappedBuildingCount = {len(buildings)};\n'
 (root/'src/townshipSites.ts').write_text(metadata)
 print(f'{len(buildings)} buildings, {len(lines)} road/rail/water segments, {len(areas)} land areas; elevations {min(heights)}–{max(heights)} m')
-print(f'Height metadata on {sum(not b["estimated"] for b in buildings)} buildings; 24 synthetic overlays placed on distinct mapped footprints.')
+print(f'Height metadata on {sum(not b["estimated"] for b in buildings)} buildings; {len(plots)} synthetic overlays placed on distinct mapped footprints.')
