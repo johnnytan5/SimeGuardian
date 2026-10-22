@@ -6,6 +6,8 @@ An opt-in wellbeing check for Sime Darby Property township residents who are oft
 
 Built for the **Sime Darby Property University Hackathon 2026 · Township of Tomorrow · Theme 1: People, Community Wellbeing**.
 
+**[Open the live dashboard →](https://sime-guardian.vercel.app/overview)**
+
 ![SimeGuardian’s 3D Putra Heights township dashboard with simulated household readings](docs/images/simeguardian/04_township_3d_wide-16x9.png)
 
 *Real map geography; simulated household identities, readings and alerts. All prototype data is synthetic.*
@@ -20,7 +22,7 @@ The product story below follows the [hackathon slide deck](Sime_Darby_Hackathon_
 
 | Member | Role |
 | --- | --- |
-| Lim Jiale | Team leader |
+| Lim Jia Le | Team leader |
 | Tan Hao Wen | Team member |
 | Tan Zhi Hong | Team member |
 
@@ -247,6 +249,8 @@ The escalation step and clock speed are configurable in Demo control. Activity f
 
 ### Run the main dashboard
 
+View the [hosted dashboard](https://sime-guardian.vercel.app/overview), or follow the steps below to run it locally.
+
 Use **Python 3.12**, **uv** and Node/npm. Install dependencies from the repository root:
 
 ```bash
@@ -271,7 +275,7 @@ cd backend
 MLFLOW_DISABLE_TELEMETRY=true uv run --locked uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
 
-Open <http://127.0.0.1:8000>. Follow the [MLflow runbook](docs/MLFLOW.md#run-locally) to create initial training runs when needed. Training creates a candidate; promotion is explicit and quality-gated. The next explicit replay inference resolves the selected numeric champion.
+For this local build, open `/overview` on port 8000. Follow the [MLflow runbook](docs/MLFLOW.md#run-locally) to create initial training runs when needed. Training creates a candidate; promotion is explicit and quality-gated. The next explicit replay inference resolves the selected numeric champion.
 
 This dashboard is a loopback-only synthetic demo. See the [dashboard walkthrough](docs/DASHBOARD.md#demonstrate-the-journey) for replay, escalation, responder outcomes and implementation boundaries.
 
