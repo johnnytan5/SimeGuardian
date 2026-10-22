@@ -35,19 +35,19 @@ test('goQuiet jumps sim to threshold crossing and opens CHECKIN_PENDING', () => 
   assert.equal(lee.alert!.phaseEndsAt, 1000 + 10_000)
 })
 
-test('full escalation sim-times: +30, +15, guard +2 +3 +3', () => {
+test('full escalation sim-times: +5, +5, guard +2 +3 +3', () => {
   const w = quietLee()
   const t0 = w.sim
   tick(w, 10_000)
   assert.equal(get(w, 'lee').alert!.state, 'FAMILY_ESCALATED')
-  assert.equal(w.sim - t0, 30 * MIN)
+  assert.equal(w.sim - t0, 5 * MIN)
   tick(w, 20_000)
   assert.equal(get(w, 'lee').alert!.state, 'SECURITY_ESCALATED')
-  assert.equal(w.sim - t0, 45 * MIN)
+  assert.equal(w.sim - t0, 10 * MIN)
   advanceGuard(w, 'lee'); advanceGuard(w, 'lee'); advanceGuard(w, 'lee')
   assert.equal(get(w, 'lee').alert!.state, 'RESOLVED')
   assert.equal(get(w, 'lee').alert!.guard, 'ARRIVED_SAFE')
-  assert.equal(w.sim - t0, 53 * MIN)
+  assert.equal(w.sim - t0, 18 * MIN)
 })
 
 test('resident checkIn resolves and stops escalation', () => {

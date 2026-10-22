@@ -30,8 +30,8 @@ test('familyView is status only', () => {
   assert.equal(v.status, 'ESCALATED')
 })
 
-test('residentView countdown maps 10 s real to 30 sim-min', () => {
-  assert.equal(residentView(quietLee(), 'lee', 5_000).countdownSimMs, 15 * MIN)
+test('residentView countdown maps 10 s real to 5 sim-min', () => {
+  assert.equal(residentView(quietLee(), 'lee', 5_000).countdownSimMs, 2.5 * MIN)
 })
 
 test('residentView countdown is null outside CHECKIN_PENDING', () => {
@@ -39,4 +39,12 @@ test('residentView countdown is null outside CHECKIN_PENDING', () => {
   tick(w, 10_000)
   assert.equal(residentView(w, 'lee', 11_000).countdownSimMs, null)
   assert.equal(residentView(createWorld(0), 'lee', 0).countdownSimMs, null)
+})
+
+test('securityView escalatedAt matches the sim time the welfare check was requested', () => {
+  const w = quietLee()
+  const startedSim = w.households.find(h => h.id === 'lee')!.alert!.startedSim
+  tick(w, 10_000); tick(w, 20_000)
+  assert.equal(securityView(w)[0].escalatedAt, startedSim + 10 * MIN)
+  assert.equal(w.sim - startedSim, 10 * MIN)
 })

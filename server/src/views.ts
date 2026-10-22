@@ -1,10 +1,9 @@
 // Role-scoped projections. Privacy rules live here, not in the UI:
 // security never gets home/away, family never gets the activity timeline.
 
-import { MIN, type AlertState, type GuardState, type Household, type LogEvent, type World } from './engine.ts'
+import { CHECKIN_WINDOW, FAMILY_WINDOW, type AlertState, type GuardState, type Household, type LogEvent, type World } from './engine.ts'
 
-const CHECKIN_WINDOW = 30 * MIN
-const SECURITY_AFTER = 45 * MIN // check-in window + family window
+const SECURITY_AFTER = CHECKIN_WINDOW + FAMILY_WINDOW
 
 function find(w: World, id: string): Household {
   const h = w.households.find(x => x.id === id)
@@ -18,7 +17,7 @@ export function dashboardView(w: World, _realNow: number) {
 
 export interface ResidentView {
   id: string; resident: string; familyContact: string; consented: boolean; away: boolean
-  alertState: AlertState | null; guard: GuardState; countdownSimMs: number | null; checkinsToday: LogEvent[]; sim: number
+  alertState: AlertState | null; guard: GuardState; countdownSimMs: number | null; checkinWindowMs: number; checkinsToday: LogEvent[]; sim: number
 }
 
 export function residentView(w: World, id: string, realNow: number): ResidentView {
@@ -29,7 +28,7 @@ export function residentView(w: World, id: string, realNow: number): ResidentVie
     : null
   return {
     id: h.id, resident: h.resident, familyContact: h.familyContact, consented: h.consented, away: h.away,
-    alertState: a?.state ?? null, guard: a?.guard ?? 'NONE', countdownSimMs,
+    alertState: a?.state ?? null, guard: a?.guard ?? 'NONE', countdownSimMs, checkinWindowMs: CHECKIN_WINDOW,
     checkinsToday: w.log.filter(e => e.householdId === id && (e.type === 'threshold' || e.type === 'resolved')),
     sim: w.sim,
   }

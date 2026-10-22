@@ -35,7 +35,7 @@ You need Node 24 on the Mac and the **Expo Go** app on an iPhone. The Mac and th
 3. The phone shows a notification, then the "Are you OK?" pop-up with a countdown.
 4. Don't tap anything. After 10 s, Daniel is notified. Tap **Demo · switch to Daniel (family)** at the bottom of the phone to see his alert, with **Call Mum** and **Mark safe**.
 5. After another 10 s, a welfare check appears on the Security console. Click through **Assign guard → Mark on the way → Mark arrived**.
-6. The phone shows "All clear". The event log reads like real time (+30 min, +15 min, +2, +3, +3).
+6. The phone shows "All clear". The event log reads like real time (+5 min, +5 min, +2, +3, +3).
 
 ### Scenario B: happy path
 Click **Reset demo** and switch the phone back to Madam Lee. It returns to onboarding. Repeat steps 1–3, then tap **I'm OK** on the phone, and every screen closes the alert.

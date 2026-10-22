@@ -20,8 +20,8 @@ export interface Household {
 export interface World { sim: number; lastReal: number; speed: number; stepMs: number; households: Household[]; log: LogEvent[] }
 
 export const MIN = 60_000
-const CHECKIN_WINDOW = 30 * MIN
-const FAMILY_WINDOW = 15 * MIN
+export const CHECKIN_WINDOW = 5 * MIN
+export const FAMILY_WINDOW = 5 * MIN
 const GUARD_STEPS: [GuardState, number, string][] = [
   ['ASSIGNED', 2 * MIN, 'Guard assigned'],
   ['ON_THE_WAY', 3 * MIN, 'Guard on the way'],
@@ -113,12 +113,12 @@ export function tick(w: World, realNow: number): void {
       a.state = 'FAMILY_ESCALATED'
       a.phaseEndsAt = realNow + w.stepMs
       w.sim += CHECKIN_WINDOW
-      log(w, h, 'family', 'system', `No reply in 30 min — ${h.familyContact} notified`)
+      log(w, h, 'family', 'system', `No reply in ${CHECKIN_WINDOW / MIN} min — ${h.familyContact} notified`)
     } else if (a.state === 'FAMILY_ESCALATED') {
       a.state = 'SECURITY_ESCALATED'
       a.phaseEndsAt = null
       w.sim += FAMILY_WINDOW
-      log(w, h, 'security', 'system', 'Family window passed — welfare check requested')
+      log(w, h, 'security', 'system', `No reply in ${(CHECKIN_WINDOW + FAMILY_WINDOW) / MIN} min — welfare check requested`)
     }
   }
 }
