@@ -43,9 +43,80 @@ Click **Reset demo** and switch the phone back to Madam Lee. It returns to onboa
 The escalation step (default 10 s) and the clock speed can be changed on the Demo control tab.
 
 ### What is simulated
-Activity signals, the guard, and the family phone call are simulated. Nothing connects to real plate recognition, access cards, Air Selangor or TNB yet. The live demo clock runs the rule engine; the **Model** tab shows a real prior training run and labels its live-inference line as a demo replay.
+Activity signals, the guard, and the family phone call are simulated. Nothing connects to real plate recognition, access cards, Air Selangor or TNB yet. The live demo clock runs the rule engine. Previous local ML results have been removed; the legacy **Model** tab has no training result until a new demo run is explicitly created.
 
-## Model training
+## Current experiment: precision optimisation (v6)
+
+The [precision study](ml/household/PRECISION_REVIEW.md) reaches pooled reviewed-interval precision of **91.0% for utility anomalies and 87.1% for emergencies**, using new reserved simulation replays. Recall is 61.0% and 22.1%; grouped-alert precision remains 75.0% and 71.4%. The simulator is unchanged, the four separate source LSTMs are reused, and only detector training/features/calibration change. Family confirmations remain labels only.
+
+```sh
+python3 ml/household/precision_study.py prepare
+python3 ml/household/precision_study.py run --device mps
+python3 ml/household/verify_precision.py
+python3 -m unittest discover -s ml -p 'test_*.py'
+```
+
+The CSV data catalog is `ml/household/precision_data_v6/plan.csv`; results are in `ml/household/runs/precision-v6/`. All three reserved test seeds are retained; two individual emergency replays fall below 85% precision. This is one family archetype with independent simulation replicates, not real-world validation or multiple independent households. Commands refuse existing destinations; choose fresh `--data`/`--out` paths for reruns. Use `--device cpu` without MPS.
+
+## Earlier v5: independent forecasts and revised detection
+
+The [v5 study](ml/household/README.md#current-v5-revision) keeps four independent LSTMs for electricity, water, gate and ordinary app activity, followed by separate usage-anomaly and emergency classifiers. The revision addresses sparse/corrupted training labels and makes the older adult's agreed check-in deadlines explicit. Family confirmation responses remain labels only. [Investigation and results](ml/household/DETECTION_REVIEW.md).
+
+```sh
+python3 ml/household/multisource_dataset.py generate --revised --data ml/household/multisource_data_v5
+python3 ml/household/two_stage.py --data ml/household/multisource_data_v5 --out ml/household/runs/two-stage-v5 --device mps
+python3 ml/household/verify_two_stage.py
+python3 -m unittest discover -s ml -p 'test_*.py'
+```
+
+Generation/training refuses to overwrite existing artifacts: choose fresh paths for a rerun. Review the CSVs in `ml/household/multisource_data_v5/` and `ml/household/runs/two-stage-v5/`. Start with `app_reviews.csv`, `confusion_matrices.csv`, `forecast_metrics.csv`, `oracle_scenario_metrics.csv` and `report.md`. Fixed baseline weights remain 40% electricity, 30% water, 15% gate and 15% app; they do not constrain learned tree importance. Unconfirmed feedback is not counted as normal. Previous versions remain preserved. This enriched synthetic year is not evidence of real-world emergency performance.
+
+## Earlier v3 dataset: electricity-only with family app confirmations
+
+The current [v3 dataset](ml/household/README.md#current-study-electricity-anomalies-with-app-confirmed-labels) forecasts one family's electricity use and detects unexpected electricity patterns. **Electricity history and calendar are model inputs; family app confirmations supply labels only.** Water/gate records remain optional context. The target is household electricity usage, not an older adult's medical condition.
+
+```sh
+python3 ml/household/electricity_dataset.py generate
+python3 ml/household/electricity_dataset.py validate
+python3 ml/household/electricity_dataset.py benchmark
+```
+
+Review `ml/household/electricity_data_v3/hourly.csv`, `app_reviews.csv` and `app_labels_hourly.csv`. A validation-only benchmark is saved in `ml/household/runs/electricity-v3-validation/`. All reports are simulated, unknown feedback stays unlabelled, and the test period is reserved. No application workflow changes. The earlier family experiments below are preserved separately.
+
+## Earlier family inactivity experiments
+
+A separate [illustrative synthetic benchmark](ml/household/ILLUSTRATIVE_REVIEW.md) deliberately makes emergencies easier to distinguish: daytime-only cases and reliable hourly elder check-ins. It achieves93.8% reviewed-interval precision and88.2% recall including positive abstentions, detecting29/30 episodes; grouped-alert precision is74.4%. The original difficult data/results are preserved. These new scores describe the changed simulation, not improved real-world reliability.
+
+The latest [research review](ml/household/RECALL_REVIEW.md) prioritises emergency recall and separates it from usage forecasting. A frozen validation-selected threshold raises fresh synthetic emergency recall27.0%→87.8% and reduces FN84→14, while precision falls88.6%→28.1%. Entire-episode recall is28/30, but false alert groups reach51.6 per30 household-days. A development-only investigation demonstrates why identical sleep/emergency inputs need additional timely resident-specific evidence. Source-only LSTMs remain separate; no application notification behaviour changed.
+
+The research work has restarted with [one family household](ml/household/README.md): an older adult, two other adults and two children. It generates one year of resident routines, electricity and water readings, attributable app/gate events, outages and delayed observations. Resident activity and concern labels stay in separate truth tables. CSV outputs include a separate paired scenario suite for older-adult inactivity masked by family activity. Previous research datasets, models and reports have been deleted. A separate trainer now compares seasonal-naive, ridge, random forest, gradient boosting and LSTM on the frozen family dataset.
+
+```bash
+python3 ml/household/generate.py
+python3 ml/household/validate.py ml/household/data
+python3 -m unittest discover -s ml -p 'test_household_dataset.py'
+```
+
+Review `ml/household/data/hourly.csv`, `truth/episodes.csv`, `review.md` and `overview.png`. These remain isolated from the app's existing synthetic fixtures. Use NumPy and Matplotlib; exact generator and dependency versions are recorded in the output CSV configuration.
+
+```sh
+python3 ml/household/train.py --out ml/household/runs/comparison
+python3 ml/household/train.py --models ridge gradient_boosting --seeds 11 --out ml/household/runs/selected
+```
+
+See the [training instructions and tested dependencies](ml/household/README.md#train-different-algorithms). Each run saves CSV predictions/metrics, fitted models and a report, without modifying the dataset. All learned models use matching 14-day histories and chronological splits; exploratory inactivity alarms are evaluated separately from forecast accuracy. This remains a synthetic, one-family study with only two concern episodes in the main test period.
+
+The [paper's breakfast, lunch and sleep alarm rules](ml/household/README.md#use-the-papers-activity-alarm-rules) can also be replayed against a completed forecasting run:
+
+```sh
+python3 ml/household/paper_alarms.py --run ml/household/runs/comparison --out ml/household/runs/paper-alarms
+```
+
+The [v2 evaluation](ml/household/README.md#evaluation-v2-availability-separate-labels-and-hourly-detection) adds a separate frozen CSV challenge with household routine labels and elder-concern labels, a fixed 30-minute upload allowance, and an hourly elder-focused Isolation Forest comparison. Run `python3 ml/household/evaluation_v2.py prepare` followed by `python3 ml/household/evaluation_v2.py run --device mps`. The original year and saved forecasts remain unchanged; the previously reviewed test is development evidence, while the new challenge is scored after its plan is frozen.
+
+This implements the paper's alarm stage with documented timing and standard-deviation assumptions; it reuses the existing forecasters. Household routine alarms and elder-concern results are reported separately.
+
+## Legacy app demo training
 
 `ml/` generates a synthetic dataset (120 elderly households × 90 days of 15-minute electricity and water, plus app and gate events, with labelled concern episodes, naps, away trips and feed outages), builds past-only hourly features, splits households 70/15/15 with separate date ranges, trains an Isolation Forest on normal training windows, picks thresholds on validation and scores the untouched test split once against the rule baseline.
 
@@ -53,6 +124,8 @@ Activity signals, the guard, and the family phone call are simulated. Nothing co
 python3 -m venv ml/.venv && ml/.venv/bin/pip install -r ml/requirements.txt
 ml/.venv/bin/python ml/train.py     # writes ml/runs/<run_id>/ and ml/runs/latest.json
 ```
+
+This older Isolation Forest demo pipeline is retained for its existing app callers. It is not the new family dataset or a result of the restarted study.
 
 ## Tests
 
