@@ -16,6 +16,8 @@ mlruns/
 .pytest_cache/
 test-results/
 playwright-report/
+/SimeGuardian_screenshots/
+/Sime_Darby_Hackathon_Slides (1).pptx
 
 # Legacy demo training artifacts; regenerated only by an explicit demo run
 ml/runs/
