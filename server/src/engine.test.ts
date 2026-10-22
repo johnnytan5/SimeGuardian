@@ -1,7 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
-  createWorld, tick, goQuiet, checkIn, setAway, consent, advanceGuard, reset, MIN,
+  createWorld, tick, goQuiet, checkIn, setAway, consent, advanceGuard, reset, explain, MIN,
   type World,
 } from './engine.ts'
 
@@ -135,4 +135,28 @@ test('resolved alert does not re-fire', () => {
 
 test('unknown id throws', () => {
   assert.throws(() => goQuiet(createWorld(0), 'nope', 0), /unknown household/)
+})
+
+test('a check-in explains itself per signal against her usual pattern', () => {
+  const w = createWorld(0)
+  consent(w, 'lee')
+  goQuiet(w, 'lee', 0)
+  const reasons = get(w, 'lee').alert!.reasons
+  const by = Object.fromEntries(reasons.map(r => [r.signal, r]))
+  assert.deepEqual(Object.keys(by).sort(), ['app', 'electricity', 'gate', 'water'])
+  assert.equal(by.water.percentOfUsual, 0)
+  assert.equal(by.water.concerning, true)
+  assert.ok(by.electricity.percentOfUsual! > 0 && by.electricity.percentOfUsual! < 50, 'baseload only')
+  assert.equal(by.gate.label, 'No access card in or out today')
+  assert.equal(by.app.concerning, true)
+})
+
+test('activity inside the quiet window is not hidden by the explanation', () => {
+  const w = createWorld(0)
+  consent(w, 'lee')
+  for (let real = 1_000; real <= 90_000; real += 1_000) tick(w, real) // 3 sim hours of normal routine
+  const h = get(w, 'lee')
+  assert.ok(h.activities.length > 0)
+  const water = explain(h, w.sim).find(r => r.signal === 'water')!
+  assert.ok(water.percentOfUsual! > 50, `normal routine reads near usual, got ${water.percentOfUsual}`)
 })

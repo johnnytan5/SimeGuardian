@@ -4,7 +4,7 @@ import { StatusBar } from 'expo-status-bar'
 import * as Notifications from 'expo-notifications'
 import * as Haptics from 'expo-haptics'
 import { usePoll } from './src/usePoll'
-import type { AlertState, FamilyView, ResidentView, Role } from './src/api'
+import type { AlertState, FamilyView, Reason, ResidentView, Role } from './src/api'
 import { color, Screen } from './src/ui'
 import { RolePicker } from './src/screens/RolePicker'
 import { Onboarding } from './src/screens/Onboarding'
@@ -17,6 +17,9 @@ import { Offline } from './src/screens/Offline'
 Notifications.setNotificationHandler({
   handleNotification: async () => ({ shouldShowBanner: true, shouldShowList: true, shouldPlaySound: true, shouldSetBadge: false }),
 })
+
+// Top concerning reasons, joined for the notification body.
+const why = (reasons: Reason[] | undefined) => (reasons ?? []).filter(r => r.concerning).slice(0, 2).map(r => r.label).join('; ')
 
 const OPEN: AlertState[] = ['CHECKIN_PENDING', 'FAMILY_ESCALATED', 'SECURITY_ESCALATED']
 const ALL_CLEAR_MS = 8000
@@ -40,7 +43,7 @@ function ResidentApp() {
   const prev = useRef<AlertState | null>(null)
   const [clearUntil, setClearUntil] = useState(0)
   const [, rerender] = useState(0)
-  useAlertOn(view?.alertState, 'CHECKIN_PENDING', 'Are you OK, Madam Lee? Tap to let us know.')
+  useAlertOn(view?.alertState, 'CHECKIN_PENDING', `Are you OK, Madam Lee? ${why(view?.reasons)}. Tap to let us know.`)
 
   useEffect(() => {
     const now = view?.alertState ?? null
@@ -60,7 +63,7 @@ function ResidentApp() {
 
 function FamilyApp() {
   const { view, error } = usePoll<FamilyView>('/api/family/lee')
-  useAlertOn(view?.alertState, 'FAMILY_ESCALATED', "Mum hasn't replied to her check-in. Please check on her.")
+  useAlertOn(view?.alertState, 'FAMILY_ESCALATED', `Mum hasn't replied to her check-in. ${why(view?.reasons)}. Please check on her.`)
   if (error) return <Offline />
   if (!view) return loading
   return <Family view={view} />

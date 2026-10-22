@@ -1,7 +1,7 @@
 import { useEffect, useRef, type ReactNode } from 'react'
 import { AccessibilityInfo, Animated, Easing, StyleSheet, Text, View } from 'react-native'
 import { post, type ResidentView } from '../api'
-import { BigButton, Brand, color, Screen, type } from '../ui'
+import { BigButton, Brand, color, Reasons, Screen, type } from '../ui'
 
 const GUARD_LINE: Record<string, string> = {
   NONE: 'A guard is being assigned.',
@@ -69,7 +69,7 @@ export function CheckIn({ view }: { view: ResidentView }) {
 
   const { title, detail, field } =
     view.alertState === 'CHECKIN_PENDING'
-      ? { title: 'Are you OK?', detail: 'Your home has been quiet for a while. Tap below so we know you’re fine.', field: color.pending }
+      ? { title: 'Are you OK?', detail: 'Your home has been quiet for a while.', field: color.pending }
       : view.alertState === 'FAMILY_ESCALATED'
         ? { title: `We’ve let ${view.familyContact} know`, detail: `${view.familyContact} may call you. If you’re fine, tap below.`, field: color.alert }
         : { title: 'Security is on the way', detail: GUARD_LINE[view.guard] ?? '', field: color.alert }
@@ -77,8 +77,9 @@ export function CheckIn({ view }: { view: ResidentView }) {
   return (
     <Screen field={field}>
       <Brand onField />
-      <Text style={[type.display, s.onField]}>{title}</Text>
+      <Text style={[type.display, s.onField, { fontSize: 46, lineHeight: 50 }]}>{title}</Text>
       <Text style={[type.body, s.onFieldMuted]}>{detail}</Text>
+      <Reasons reasons={view.reasons} title="Why we’re asking" onField compact limit={3} />
       {view.countdownSimMs !== null && (
         <View style={s.dialWrap}>
           <Pulse />
@@ -96,20 +97,20 @@ export function CheckIn({ view }: { view: ResidentView }) {
   )
 }
 
-const DIAL = 264
+const DIAL = 204
 const s = StyleSheet.create({
   onField: { color: color.onField },
   onFieldMuted: { color: color.onFieldMuted },
-  dialWrap: { alignItems: 'center', justifyContent: 'center', marginTop: 20, height: DIAL + 40 },
+  dialWrap: { alignItems: 'center', justifyContent: 'center', height: DIAL + 16 },
   pulse: { position: 'absolute', width: DIAL, height: DIAL, borderRadius: DIAL / 2, borderWidth: 1, borderColor: '#fff' },
   face: { width: DIAL, height: DIAL, borderRadius: DIAL / 2, backgroundColor: 'rgba(255,255,255,0.06)', alignItems: 'center', justifyContent: 'center' },
-  tickBar: { alignSelf: 'center', marginTop: 6, width: 2, height: 10, borderRadius: 1, backgroundColor: '#fff' },
-  tickMajor: { width: 3, height: 18, marginTop: 4, borderRadius: 1.5 },
-  core: { width: DIAL - 64, height: DIAL - 64, borderRadius: (DIAL - 64) / 2, backgroundColor: 'rgba(0,0,0,0.12)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.18)', alignItems: 'center', justifyContent: 'center' },
-  time: { fontSize: 56, fontWeight: '200', letterSpacing: 1, color: color.onField, fontVariant: ['tabular-nums'] },
-  rule: { width: 28, height: 1, backgroundColor: 'rgba(255,255,255,0.5)', marginVertical: 8 },
-  dialNote: { fontSize: 13, fontWeight: '500', letterSpacing: 0.6, color: 'rgba(255,255,255,0.7)' },
-  dialName: { fontSize: 19, fontWeight: '600', letterSpacing: 0.2, color: color.onField, marginTop: 2 },
+  tickBar: { alignSelf: 'center', marginTop: 5, width: 2, height: 8, borderRadius: 1, backgroundColor: '#fff' },
+  tickMajor: { width: 3, height: 15, marginTop: 4, borderRadius: 1.5 },
+  core: { width: DIAL - 52, height: DIAL - 52, borderRadius: (DIAL - 52) / 2, backgroundColor: 'rgba(0,0,0,0.12)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.18)', alignItems: 'center', justifyContent: 'center' },
+  time: { fontSize: 44, fontWeight: '200', letterSpacing: 1, color: color.onField, fontVariant: ['tabular-nums'] },
+  rule: { width: 24, height: 1, backgroundColor: 'rgba(255,255,255,0.5)', marginVertical: 5 },
+  dialNote: { fontSize: 11, fontWeight: '500', letterSpacing: 0.6, color: 'rgba(255,255,255,0.7)' },
+  dialName: { fontSize: 16, fontWeight: '600', letterSpacing: 0.2, color: color.onField, marginTop: 2 },
   tickHalo: { width: 148, height: 148, borderRadius: 74, backgroundColor: 'rgba(255,255,255,0.1)', alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
   tick: { width: 112, height: 112, borderRadius: 56, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center' },
   tickMark: { fontSize: 60, color: color.ok, fontWeight: '800' },

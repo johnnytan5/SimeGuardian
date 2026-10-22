@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import type { Reason } from './api'
 import { Image, Pressable, StyleSheet, Text, View, type ImageSourcePropType, type ViewStyle } from 'react-native'
 
 // Calm states sit on white; a state that needs attention takes over the whole screen in a deep
@@ -106,4 +107,54 @@ const s = StyleSheet.create({
   button: { minHeight: 72, borderRadius: 36, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24, paddingVertical: 10 },
   buttonText: { fontSize: 23, fontWeight: '700', letterSpacing: -0.2 },
   buttonHint: { fontSize: 14, opacity: 0.7, marginTop: 2 },
+})
+
+const GLYPH: Record<Reason['signal'], string> = { electricity: 'ϟ', water: '◈', gate: '⇄', app: '▢' }
+
+// Explainable alert: which signals made us ask, each compared with this home's usual pattern.
+// On a coloured field (onField) it is a translucent panel; `compact` hides the detail line.
+export function Reasons({ reasons, title, onField, compact, limit }: { reasons: Reason[]; title: string; onField?: boolean; compact?: boolean; limit?: number }) {
+  const shown = reasons.filter(r => r.concerning).slice(0, limit)
+  if (shown.length === 0) return null
+  const ink = onField ? color.onField : color.ink
+  const sub = onField ? color.onFieldMuted : color.muted
+  return (
+    <View accessibilityRole="summary" style={[r.panel, onField ? r.panelField : r.panelPlain]}>
+      <Text style={[r.title, { color: sub }]}>{title}</Text>
+      {shown.map(x => (
+        <View key={x.signal} style={r.row}>
+          <View style={[r.icon, { backgroundColor: onField ? 'rgba(255,255,255,0.18)' : color.panel }]}>
+            <Text style={[r.glyph, { color: ink }]}>{GLYPH[x.signal]}</Text>
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={[r.label, { color: ink }]}>{x.label}</Text>
+            {!compact && <Text style={[r.detail, { color: sub }]}>{x.detail}</Text>}
+          </View>
+          {x.percentOfUsual !== null && <Meter pct={x.percentOfUsual} onField={onField} />}
+        </View>
+      ))}
+    </View>
+  )
+}
+
+// A short bar showing actual use as a share of usual, so "17%" reads at a glance.
+function Meter({ pct, onField }: { pct: number; onField?: boolean }) {
+  return (
+    <View style={[r.meter, { backgroundColor: onField ? 'rgba(255,255,255,0.22)' : color.line }]}>
+      <View style={{ width: `${Math.max(4, Math.min(100, pct))}%`, height: '100%', borderRadius: 3, backgroundColor: onField ? '#fff' : color.brand }} />
+    </View>
+  )
+}
+
+const r = StyleSheet.create({
+  panel: { borderRadius: 22, padding: 16, gap: 12 },
+  panelField: { backgroundColor: 'rgba(0,0,0,0.14)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.18)' },
+  panelPlain: { backgroundColor: color.bg, borderWidth: 1, borderColor: color.line },
+  title: { fontSize: 14, fontWeight: '600', letterSpacing: 0.3 },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  icon: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center' },
+  glyph: { fontSize: 17, fontWeight: '700' },
+  label: { fontSize: 18, fontWeight: '600', letterSpacing: -0.2 },
+  detail: { fontSize: 14, lineHeight: 19, marginTop: 1 },
+  meter: { width: 40, height: 6, borderRadius: 3, overflow: 'hidden' },
 })

@@ -22,12 +22,14 @@ test('securityView lists only SECURITY_ESCALATED or guard-in-progress alerts', (
   assert.deepEqual(securityView(quietLee()), [])
 })
 
-test('familyView is status only', () => {
+test('familyView is status plus summary reasons, never raw activity', () => {
   const w = quietLee()
   tick(w, 10_000)
   const v = familyView(w, 'lee')
-  assert.deepEqual(Object.keys(v).sort(), ['alertState', 'id', 'resident', 'since', 'status'])
+  assert.deepEqual(Object.keys(v).sort(), ['alertState', 'id', 'reasons', 'resident', 'since', 'status'])
   assert.equal(v.status, 'ESCALATED')
+  for (const r of v.reasons) assert.deepEqual(Object.keys(r).sort(), ['concerning', 'detail', 'label', 'percentOfUsual', 'signal'])
+  assert.ok(!JSON.stringify(v).includes('activities'))
 })
 
 test('residentView countdown maps 10 s real to 5 sim-min', () => {

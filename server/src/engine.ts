@@ -5,7 +5,11 @@ export type AlertState = 'OK' | 'CHECKIN_PENDING' | 'FAMILY_ESCALATED' | 'SECURI
 export type GuardState = 'NONE' | 'ASSIGNED' | 'ON_THE_WAY' | 'ARRIVED_SAFE'
 export type Actor = 'system' | 'resident' | 'family' | 'security' | 'presenter'
 
-export interface Alert { state: AlertState; guard: GuardState; phaseEndsAt: number | null; startedSim: number }
+export type Signal = 'electricity' | 'water' | 'gate' | 'app'
+// Why a check-in was sent: one line per signal, comparing the quiet window with her usual pattern.
+export interface Reason { signal: Signal; label: string; detail: string; concerning: boolean; percentOfUsual: number | null }
+export interface Alert { state: AlertState; guard: GuardState; phaseEndsAt: number | null; startedSim: number; reasons: Reason[] }
+interface Activity { sim: number; gate: boolean; app: boolean }
 export interface LogEvent { sim: number; householdId: string; type: string; actor: Actor; text: string }
 export interface Household {
   id: string; resident: string; unit: string; familyContact: string
@@ -14,6 +18,7 @@ export interface Household {
   thresholdMin: number
   activityEveryMin: number
   lastActivity: number
+  activities: Activity[]
   home: boolean; away: boolean; consented: boolean; quiet: boolean
   alert: Alert | null
 }
@@ -27,6 +32,10 @@ const GUARD_STEPS: [GuardState, number, string][] = [
   ['ON_THE_WAY', 3 * MIN, 'Guard on the way'],
   ['ARRIVED_SAFE', 3 * MIN, 'Guard arrived — resident safe'],
 ]
+// Simulated meter readings per activity event, plus an always-on electricity baseload (fridge, router).
+const WATER_L_PER_EVENT = 15
+const KWH_PER_EVENT = 0.2
+const BASELOAD_KWH_PER_H = 0.08
 const AWAKE_FROM = 6
 const AWAKE_UNTIL = 23
 
@@ -35,7 +44,7 @@ const AWAKE_UNTIL = 23
 const DAY = [0, 0, 0, 0, 0, 0, 1, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 2, 1, 0]
 const shift = (by: number) => DAY.map((_, i) => DAY[(i - by + 24) % 24])
 
-function seed(): Omit<Household, 'today' | 'lastActivity' | 'home' | 'away' | 'consented' | 'quiet' | 'alert'>[] {
+function seed(): Omit<Household, 'today' | 'lastActivity' | 'activities' | 'home' | 'away' | 'consented' | 'quiet' | 'alert'>[] {
   return [
     { id: 'lee', resident: 'Madam Lee', unit: 'No. 12, Jalan Elmina 3', familyContact: 'Daniel', baseline: DAY, thresholdMin: 120, activityEveryMin: 25 },
     { id: 'tan', resident: 'Mr Tan', unit: 'No. 4, Jalan Elmina 3', familyContact: 'Mei Ling', baseline: shift(1), thresholdMin: 150, activityEveryMin: 20 },
@@ -52,7 +61,7 @@ export function createWorld(realNow: number): World {
   return {
     sim, lastReal: realNow, speed: 120, stepMs: 10_000, log: [],
     households: seed().map(h => ({
-      ...h, today: new Array(24).fill(0), lastActivity: sim,
+      ...h, today: new Array(24).fill(0), lastActivity: sim, activities: [],
       // Madam Lee consents on camera; the rest of the precinct is already enrolled
       home: true, away: false, consented: h.id !== 'lee', quiet: false, alert: null,
     })),
@@ -80,8 +89,49 @@ function gap(h: Household, sim: number): number {
   return sim - Math.max(h.lastActivity, morning.getTime())
 }
 
+const fmt = (n: number, unit: string) => `${n === 0 || n >= 10 ? Math.round(n) : n.toFixed(1)} ${unit}`
+const pct = (actual: number, usual: number) => usual > 0 ? Math.round(actual / usual * 100) : null
+
+// Compare the quiet window with the household's own baseline for the same hours.
+export function explain(h: Household, sim: number): Reason[] {
+  const from = sim - h.thresholdMin * MIN
+  const hours = (sim - from) / (60 * MIN)
+  let usualEvents = 0
+  for (let t = from; t < sim; t += 60 * MIN) usualEvents += h.baseline[hourOf(t)] * Math.min(1, (sim - t) / (60 * MIN))
+  const recent = h.activities.filter(a => a.sim >= from)
+  const window = `Last ${hours >= 1 ? `${+hours.toFixed(1)} h` : `${Math.round(hours * 60)} min`}`
+
+  const kwh = BASELOAD_KWH_PER_H * hours + recent.length * KWH_PER_EVENT
+  const usualKwh = BASELOAD_KWH_PER_H * hours + usualEvents * KWH_PER_EVENT
+  const litres = recent.length * WATER_L_PER_EVENT
+  const usualLitres = usualEvents * WATER_L_PER_EVENT
+  const ePct = pct(kwh, usualKwh), wPct = pct(litres, usualLitres)
+
+  const morning = new Date(sim); morning.setHours(AWAKE_FROM, 0, 0, 0)
+  const lastGate = h.activities.filter(a => a.gate && a.sim >= morning.getTime()).at(-1)
+  const lastApp = h.activities.filter(a => a.app).at(-1)
+  const appQuietH = lastApp ? (sim - lastApp.sim) / (60 * MIN) : null
+
+  return [
+    { signal: 'water', percentOfUsual: wPct, concerning: wPct !== null && wPct < 50,
+      label: litres === 0 ? 'No water used' : `Water ${wPct}% of usual`,
+      detail: `${window}: ${fmt(litres, 'L')} (usually about ${fmt(usualLitres, 'L')})` },
+    { signal: 'electricity', percentOfUsual: ePct, concerning: ePct !== null && ePct < 50,
+      label: `Electricity ${ePct}% of usual`,
+      detail: `${window}: ${fmt(kwh, 'kWh')}${ePct !== null && ePct < 50 ? ', about fridge level' : ''} (usually ${fmt(usualKwh, 'kWh')})` },
+    { signal: 'gate', percentOfUsual: null, concerning: !lastGate,
+      label: lastGate ? 'Access card used today' : 'No access card in or out today',
+      detail: lastGate ? `Last used at the guardhouse at ${hhmm(lastGate.sim)}` : 'No gate entry or exit since 6 am' },
+    { signal: 'app', percentOfUsual: null, concerning: appQuietH === null || appQuietH >= h.thresholdMin / 60,
+      label: appQuietH === null ? 'No app activity today' : `No app activity for ${Math.floor(appQuietH)} h`,
+      detail: lastApp ? `Last opened the township app at ${hhmm(lastApp.sim)}` : 'The township app has not been opened today' },
+  ]
+}
+
+const hhmm = (sim: number) => { const d = new Date(sim); return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}` }
+
 function openAlert(w: World, h: Household, realNow: number) {
-  h.alert = { state: 'CHECKIN_PENDING', guard: 'NONE', phaseEndsAt: realNow + w.stepMs, startedSim: w.sim }
+  h.alert = { state: 'CHECKIN_PENDING', guard: 'NONE', phaseEndsAt: realNow + w.stepMs, startedSim: w.sim, reasons: explain(h, w.sim) }
   const mins = Math.round((w.sim - h.lastActivity) / MIN)
   log(w, h, 'threshold', 'system', `Inactive ${Math.floor(mins / 60)}h ${mins % 60}m — check-in sent to ${h.resident}`)
 }
@@ -103,6 +153,9 @@ export function tick(w: World, realNow: number): void {
     if (h.home && !h.quiet && !h.away && awake(w.sim) && w.sim - h.lastActivity >= h.activityEveryMin * MIN) {
       h.lastActivity = w.sim
       h.today[hourOf(w.sim)]++
+      // ponytail: fixed cadence for app (every 2nd event) and gate use (every 4th); fine for a demo simulator
+      const n = h.activities.length
+      h.activities.push({ sim: w.sim, app: n % 2 === 0, gate: n % 4 === 1 })
     }
     if (h.consented && h.home && !h.away && !active(h) && awake(w.sim) && gap(h, w.sim) > h.thresholdMin * MIN) {
       openAlert(w, h, realNow)
@@ -128,6 +181,8 @@ export function goQuiet(w: World, id: string, realNow: number): void {
   if (!h.consented || h.away || active(h)) return
   h.quiet = true
   h.lastActivity = w.sim - h.thresholdMin * MIN
+  // The presenter shortcut stands for 'she has been quiet this long', so drop activity inside that window.
+  h.activities = h.activities.filter(a => a.sim < h.lastActivity)
   openAlert(w, h, realNow)
 }
 

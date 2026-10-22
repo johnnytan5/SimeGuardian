@@ -1,14 +1,17 @@
 import Constants from 'expo-constants'
 
 export type AlertState = 'OK' | 'CHECKIN_PENDING' | 'FAMILY_ESCALATED' | 'SECURITY_ESCALATED' | 'RESOLVED'
+export type Signal = 'electricity' | 'water' | 'gate' | 'app'
+// Copied from server/src/engine.ts — keep in sync.
+export interface Reason { signal: Signal; label: string; detail: string; concerning: boolean; percentOfUsual: number | null }
 export type GuardState = 'NONE' | 'ASSIGNED' | 'ON_THE_WAY' | 'ARRIVED_SAFE'
 export interface LogEvent { sim: number; householdId: string; type: string; actor: string; text: string }
 // Copied from server/src/views.ts — keep in sync.
 export interface ResidentView {
   id: string; resident: string; familyContact: string; consented: boolean; away: boolean
-  alertState: AlertState | null; guard: GuardState; countdownSimMs: number | null; checkinWindowMs: number; checkinsToday: LogEvent[]; sim: number
+  alertState: AlertState | null; guard: GuardState; countdownSimMs: number | null; checkinWindowMs: number; reasons: Reason[]; checkinsToday: LogEvent[]; sim: number
 }
-export interface FamilyView { id: string; resident: string; status: 'OK' | 'CHECKIN_PENDING' | 'ESCALATED'; alertState: AlertState | null; since: number | null }
+export interface FamilyView { id: string; resident: string; status: 'OK' | 'CHECKIN_PENDING' | 'ESCALATED'; alertState: AlertState | null; since: number | null; reasons: Reason[] }
 export type Role = 'resident' | 'family'
 
 // The phone reaches the Mac at the same host Expo Go loaded the bundle from.

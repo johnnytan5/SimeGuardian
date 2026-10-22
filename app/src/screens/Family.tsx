@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { StyleSheet, Text, View } from 'react-native'
+import { ScrollView, StyleSheet, Text, View } from 'react-native'
 import { hhmm, post, type FamilyView } from '../api'
-import { Avatar, avatars, BigButton, Brand, Chip, color, Screen, type } from '../ui'
+import { Avatar, avatars, BigButton, Brand, Chip, color, Reasons, Screen, type } from '../ui'
 
 export function Family({ view }: { view: FamilyView }) {
   const [calling, setCalling] = useState(false)
@@ -20,17 +20,19 @@ export function Family({ view }: { view: FamilyView }) {
   return (
     <Screen field={field}>
       <Brand onField={onField} />
-      <View style={s.who}>
-        <Avatar source={avatars.lee} size={68} ring={onField ? 'rgba(255,255,255,0.35)' : color.line} badge={field ?? color.ok} />
-        <View>
-          <Text style={[type.label, onField && s.onFieldMuted]}>Your mum</Text>
-          <Text style={[s.name, onField && s.onField]}>{view.resident}</Text>
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ gap: 16, paddingBottom: 8 }}>
+        <View style={s.who}>
+          <Avatar source={avatars.lee} size={68} ring={onField ? 'rgba(255,255,255,0.35)' : color.line} badge={field ?? color.ok} />
+          <View>
+            <Text style={[type.label, onField && s.onFieldMuted]}>Your mum</Text>
+            <Text style={[s.name, onField && s.onField]}>{view.resident}</Text>
+          </View>
         </View>
-      </View>
-      <Text style={[type.display, { fontSize: 46, lineHeight: 50 }, onField && s.onField]}>{title}</Text>
-      <Text style={[type.body, onField && s.onFieldMuted]}>{detail}</Text>
-      {open && view.since !== null && <Chip onField text={`Quiet since ${hhmm(view.since)}`} />}
-      <View style={{ flex: 1 }} />
+        <Text style={[type.display, { fontSize: 40, lineHeight: 44 }, onField && s.onField]}>{title}</Text>
+        <Text style={[type.body, onField && s.onFieldMuted]}>{detail}</Text>
+        {open && view.since !== null && <Chip onField text={`Quiet since ${hhmm(view.since)}`} />}
+        {open && <Reasons reasons={view.reasons} title="Why you’re seeing this" onField />}
+      </ScrollView>
       {calling && <Text style={[type.body, s.onField, { textAlign: 'center' }]}>Calling Mum… (demo)</Text>}
       {open && (
         <View style={{ gap: 14 }}>
