@@ -17,5 +17,27 @@ mlruns/
 test-results/
 playwright-report/
 
-# ML run artifacts (re-create with ml/train.py); latest.json is kept for the dashboard
-ml/runs/*/
+# Legacy demo training artifacts; regenerated only by an explicit demo run
+ml/runs/
+
+# Research working files; the selected handoff is committed as one portable archive.
+/ml/household/
+/ml/test_electricity_dataset.py
+/ml/test_evaluation_v2.py
+/ml/test_forecast_finetune.py
+/ml/test_household_dataset.py
+/ml/test_household_training.py
+/ml/test_illustrative_study.py
+/ml/test_package_study_tools.py
+/ml/test_paper_alarms.py
+/ml/test_precision_study.py
+/ml/test_recall_study.py
+/ml/test_revised_protocol.py
+/ml/test_tuned_study.py
+/ml/test_two_stage.py
+
+# Keep the final archive and guide; ignore unpacked and temporary outputs.
+/final_output/*
+!/final_output/README.md
+!/final_output/SimeGuardian_Modeling.zip
+!/final_output/SimeGuardian_Modeling.zip.sha256
