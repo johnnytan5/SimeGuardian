@@ -6,7 +6,7 @@ An opt-in wellbeing check for Sime Darby Property township residents who are oft
 
 Built for the **Sime Darby Property University Hackathon 2026 · Township of Tomorrow · Theme 1: People, Community Wellbeing**.
 
-![SimeGuardian’s 3D Putra Heights township dashboard with simulated household readings](SimeGuardian_screenshots/04_township_3d_wide-16x9.png)
+![SimeGuardian’s 3D Putra Heights township dashboard with simulated household readings](docs/images/simeguardian/04_township_3d_wide-16x9.png)
 
 *Real map geography; simulated household identities, readings and alerts. All prototype data is synthetic.*
 
@@ -56,9 +56,9 @@ SimeGuardian connects that quiet period to a human response, while keeping the r
     <th>Resolved · family sees the outcome</th>
   </tr>
   <tr>
-    <td><img src="SimeGuardian_screenshots/01_madam-lee_are-you-ok.png" alt="Madam Lee’s orange Are you OK screen with a countdown and I’m OK button" width="230"></td>
-    <td><img src="SimeGuardian_screenshots/02_daniel_family-alert.png" alt="Daniel’s red family alert with Call Mum and Mark safe actions" width="230"></td>
-    <td><img src="SimeGuardian_screenshots/02c_daniel_mum-is-safe.png" alt="Daniel’s green Mum is safe confirmation" width="230"></td>
+    <td><img src="docs/images/simeguardian/01_madam-lee_are-you-ok.png" alt="Madam Lee’s orange Are you OK screen with a countdown and I’m OK button" width="230"></td>
+    <td><img src="docs/images/simeguardian/02_daniel_family-alert.png" alt="Daniel’s red family alert with Call Mum and Mark safe actions" width="230"></td>
+    <td><img src="docs/images/simeguardian/02c_daniel_mum-is-safe.png" alt="Daniel’s green Mum is safe confirmation" width="230"></td>
   </tr>
 </table>
 
@@ -85,7 +85,7 @@ The proposed service reuses available township data feeds. Real utility and acce
 | **Check in and escalate** | Resident → family at +5 min → township at +10 min |
 | **Resolve and record** | One incident timeline records responsibility and the completed human check-in |
 
-![Demo event log showing resident check-in, family escalation, welfare-check request and guard arrival](SimeGuardian_screenshots/03b_event-log_demo-control.png)
+![Demo event log showing resident check-in, family escalation, welfare-check request and guard arrival](docs/images/simeguardian/03b_event-log_demo-control.png)
 
 *The phone demo compresses each five-minute escalation interval to 10 seconds by default. The event log displays simulated elapsed time.*
 
@@ -127,8 +127,8 @@ Responders should see only the information needed for their assigned check-in. T
 <summary>View the resident’s consent and home screens</summary>
 
 <p>
-  <img src="SimeGuardian_screenshots/01b_madam-lee_consent.png" alt="Resident consent screen explaining the three escalation steps" width="230">
-  <img src="SimeGuardian_screenshots/01c_madam-lee_home.png" alt="Madam Lee’s home screen with away-mode control" width="230">
+  <img src="docs/images/simeguardian/01b_madam-lee_consent.png" alt="Resident consent screen explaining the three escalation steps" width="230">
+  <img src="docs/images/simeguardian/01c_madam-lee_home.png" alt="Madam Lee’s home screen with away-mode control" width="230">
 </p>
 
 </details>
@@ -164,7 +164,7 @@ The deck identifies **Sime Darby Property, TNB, Air Selangor and the JMB** as pr
 
 The prototype includes resident/family screens, timed escalation, a security console, a 3D township dashboard and model-training evidence.
 
-![Full township operations dashboard with household list, selected-home inspector and utility charts](SimeGuardian_screenshots/04a_township_full-dashboard.png)
+![Full township operations dashboard with household list, selected-home inspector and utility charts](docs/images/simeguardian/04a_township_full-dashboard.png)
 
 *Putra Heights map with simulated household usage. Map colours show relative usage; they do not establish a medical condition or an emergency.*
 
@@ -173,19 +173,19 @@ The prototype includes resident/family screens, timed escalation, a security con
 
 **Incident evidence and timeline**
 
-![Incident page with model trigger, notification evidence and response timeline](SimeGuardian_screenshots/03a_incident-timeline.png)
+![Incident page with model trigger, notification evidence and response timeline](docs/images/simeguardian/03a_incident-timeline.png)
 
 **Township security console**
 
-![Security console with a welfare-check request and guard-assignment action](SimeGuardian_screenshots/03c_security-console.png)
+![Security console with a welfare-check request and guard-assignment action](docs/images/simeguardian/03c_security-console.png)
 
 **Rule versus model comparison**
 
-![Synthetic benchmark comparison of the rule baseline, Isolation Forest and corroborated model](SimeGuardian_screenshots/05a_model_rule-vs-model.png)
+![Synthetic benchmark comparison of the rule baseline, Isolation Forest and corroborated model](docs/images/simeguardian/05a_model_rule-vs-model.png)
 
 **MLflow model registry**
 
-![Model registry showing candidate and champion versions with promotion history](SimeGuardian_screenshots/05b_model-registry.png)
+![Model registry showing candidate and champion versions with promotion history](docs/images/simeguardian/05b_model-registry.png)
 
 </details>
 
@@ -393,5 +393,5 @@ Browser checks require the local services, installed Google Chrome and initial/r
 - [Mobile implementation plan](docs/MOBILE_IMPLEMENTATION_PLAN.md) — originally written for native/Flutter clients; this branch uses Expo Go
 - [Phone demo design](docs/superpowers/specs/2026-10-19-simeguardian-demo-design.md) and [implementation plan](docs/superpowers/plans/2026-10-19-simeguardian-demo.md)
 - [Map sources, attribution and extraction](web/public/township/SOURCES.md)
-- [Screenshot catalog](SimeGuardian_screenshots/README.md)
+- [Screenshot catalog](docs/images/simeguardian/README.md)
 - [Hackathon presentation](Sime_Darby_Hackathon_Slides%20%281%29.pptx)
