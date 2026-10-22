@@ -31,6 +31,7 @@ import { DashboardPages, pages } from "./DashboardPages";
 import { DemoFlow, demoSteps } from "./DemoFlow";
 import { getRole, switchRole } from "./api";
 import { GuidedDemo, guidedDemoOnEntry, startTour } from "./GuidedDemo";
+import { StudyResults } from "./StudyResults";
 
 export default function App() {
   const location = useLocation();
@@ -623,6 +624,9 @@ export default function App() {
 
               {(view === "Model training" || view === "Evaluation") && (
                 <>
+                  {view === "Model training" ? (
+                    <StudyResults />
+                  ) : (
                   <div className="kpi-grid">
                     <article className="kpi">
                       <div className="kpi-label">
@@ -709,6 +713,7 @@ export default function App() {
                       <p>Benign validation windows flagged</p>
                     </article>
                   </div>
+                  )}
                   <div className="analysis-grid">
                     <section className="panel evolution">
                       <div className="panel-heading">
