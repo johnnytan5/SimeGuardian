@@ -20,7 +20,7 @@ async function readJson(req: http.IncomingMessage): Promise<any> {
   try { return JSON.parse(raw) } catch { throw new HttpError(400, 'bad json') }
 }
 
-export function startServer(port: number): Promise<http.Server> {
+export function startServer(port: number, host = '0.0.0.0'): Promise<http.Server> {
   const world = createWorld(Date.now())
   const timer = setInterval(() => tick(world, Date.now()), 250)
 
@@ -83,10 +83,12 @@ export function startServer(port: number): Promise<http.Server> {
     }
   })
   server.on('close', () => clearInterval(timer))
-  return new Promise(resolve => server.listen(port, '0.0.0.0', () => resolve(server)))
+  return new Promise(resolve => server.listen(port, host, () => resolve(server)))
 }
 
 if (import.meta.main) {
-  await startServer(4000)
-  console.log('SimeGuardian server on http://localhost:4000')
+  // PORT/HOST let a deployment bind elsewhere (e.g. 127.0.0.1 behind a reverse proxy); defaults suit the LAN phone demo.
+  const port = Number(process.env.PORT ?? 4000)
+  await startServer(port, process.env.HOST ?? '0.0.0.0')
+  console.log(`SimeGuardian server on http://localhost:${port}`)
 }
