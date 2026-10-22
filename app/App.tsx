@@ -76,9 +76,9 @@ export default function App() {
       <Pressable
         accessibilityRole="button"
         onPress={() => setRole(role === 'resident' ? 'family' : 'resident')}
-        style={{ paddingVertical: 14, paddingBottom: 30, alignItems: 'center', borderTopWidth: 1, borderTopColor: color.line }}
+        style={{ position: 'absolute', bottom: 14, alignSelf: 'center', paddingVertical: 6, paddingHorizontal: 12, borderRadius: 14, backgroundColor: 'rgba(29,34,48,0.55)' }}
       >
-        <Text style={{ color: color.muted, fontSize: 15 }}>Demo · switch to {other}</Text>
+        <Text style={{ color: '#fff', fontSize: 13, fontWeight: '600' }}>Demo: switch to {other}</Text>
       </Pressable>
       <StatusBar style="dark" />
     </View>

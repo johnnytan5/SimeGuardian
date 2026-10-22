@@ -6,7 +6,7 @@ export interface LogEvent { sim: number; householdId: string; type: string; acto
 // Copied from server/src/views.ts — keep in sync.
 export interface ResidentView {
   id: string; resident: string; familyContact: string; consented: boolean; away: boolean
-  alertState: AlertState | null; guard: GuardState; countdownSimMs: number | null; checkinsToday: LogEvent[]; sim: number
+  alertState: AlertState | null; guard: GuardState; countdownSimMs: number | null; checkinWindowMs: number; checkinsToday: LogEvent[]; sim: number
 }
 export interface FamilyView { id: string; resident: string; status: 'OK' | 'CHECKIN_PENDING' | 'ESCALATED'; alertState: AlertState | null; since: number | null }
 export type Role = 'resident' | 'family'

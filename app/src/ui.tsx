@@ -1,38 +1,109 @@
 import type { ReactNode } from 'react'
-import { Pressable, StyleSheet, Text, View, type ViewStyle } from 'react-native'
+import { Image, Pressable, StyleSheet, Text, View, type ImageSourcePropType, type ViewStyle } from 'react-native'
 
+// Calm states sit on white; a state that needs attention takes over the whole screen in a deep
+// SDP tone. Field colours are dark enough for white body text (WCAG AA) for older eyes.
 export const color = {
-  bg: '#f4f6f5', panel: '#ffffff', ink: '#18221f', muted: '#5d6b66', line: '#dde3e0',
-  brand: '#0f6b5c', ok: '#1f8a4c', pending: '#c98a00', alert: '#c4362b',
+  bg: '#ffffff', panel: '#f6f4f2', ink: '#1d2230', muted: '#5f6472', line: '#e9e5e1',
+  brand: '#c94a1b', ok: '#1f7a4a', pending: '#c94a1b', alert: '#b3261e', onField: '#ffffff', onFieldMuted: 'rgba(255,255,255,0.84)',
 }
 
-export function Screen({ children, style }: { children: ReactNode; style?: ViewStyle }) {
-  return <View style={[s.screen, style]}>{children}</View>
+// One soft, low shadow for anything you can touch; flat surfaces stay flat.
+export const lift: ViewStyle = {
+  shadowColor: '#1d2230', shadowOpacity: 0.1, shadowRadius: 18, shadowOffset: { width: 0, height: 8 }, elevation: 5,
 }
 
-export function BigButton({ label, onPress, tone = 'brand' }: { label: string; onPress: () => void; tone?: 'brand' | 'ok' | 'plain' }) {
-  const bg = tone === 'plain' ? color.panel : tone === 'ok' ? color.ok : color.brand
+export const avatars = {
+  lee: require('../assets/avatar-madam-lee.png'),
+  daniel: require('../assets/avatar-daniel.png'),
+}
+
+export function Screen({ children, style, field }: { children: ReactNode; style?: ViewStyle; field?: string }) {
+  return <View style={[s.screen, field ? { backgroundColor: field } : null, style]}>{children}</View>
+}
+
+// Brand row at the top of every screen: the module lives inside SDP's township app.
+export function Brand({ onField, right }: { onField?: boolean; right?: ReactNode }) {
+  return (
+    <View style={s.brand}>
+      <View style={[s.logoChip, lift]}>
+        <Image source={require('../assets/sdp-logo.png')} style={s.logo} resizeMode="contain" />
+      </View>
+      <View>
+        <Text style={[s.brandName, onField && { color: color.onField }]}>SimeGuardian</Text>
+        <Text style={[s.brandSub, onField && { color: color.onFieldMuted }]}>Sime Darby Property</Text>
+      </View>
+      <View style={{ flex: 1 }} />
+      {right}
+    </View>
+  )
+}
+
+// Photo inside a white inner ring; an optional dot shows the person's current status.
+export function Avatar({ source, size = 56, ring, badge }: { source: ImageSourcePropType; size?: number; ring?: string; badge?: string }) {
+  const dot = Math.max(14, size * 0.26)
+  return (
+    <View style={{ width: size, height: size }}>
+      <View style={{ flex: 1, borderRadius: size / 2, padding: 3, backgroundColor: ring ?? color.line }}>
+        <View style={{ flex: 1, borderRadius: size / 2, overflow: 'hidden', borderWidth: 2, borderColor: '#fff', backgroundColor: '#fff' }}>
+          <Image source={source} style={{ width: '100%', height: '100%' }} />
+        </View>
+      </View>
+      {badge && <View style={{ position: 'absolute', right: 0, bottom: 0, width: dot, height: dot, borderRadius: dot / 2, backgroundColor: badge, borderWidth: 3, borderColor: '#fff' }} />}
+    </View>
+  )
+}
+
+export function Chip({ text, onField }: { text: string; onField?: boolean }) {
+  return (
+    <View style={[s.chip, onField ? { backgroundColor: 'rgba(255,255,255,0.16)', borderColor: 'rgba(255,255,255,0.3)' } : null]}>
+      <Text style={[s.chipText, onField && { color: color.onField }]}>{text}</Text>
+    </View>
+  )
+}
+
+type Tone = 'brand' | 'ok' | 'plain' | 'light' | 'ghost'
+export function BigButton({ label, onPress, tone = 'brand', hint }: { label: string; onPress: () => void; tone?: Tone; hint?: string }) {
+  const t = tones[tone]
   return (
     <Pressable
       accessibilityRole="button"
+      accessibilityHint={hint}
       onPress={onPress}
-      style={({ pressed }) => [s.button, { backgroundColor: bg, opacity: pressed ? 0.8 : 1 }, tone === 'plain' && s.plain]}
+      style={({ pressed }) => [s.button, t.box, { transform: [{ scale: pressed ? 0.98 : 1 }], opacity: pressed ? 0.92 : 1 }]}
     >
-      <Text style={[s.buttonText, tone === 'plain' && { color: color.ink }]}>{label}</Text>
+      <Text style={[s.buttonText, { color: t.text }]}>{label}</Text>
+      {hint && <Text style={[s.buttonHint, { color: t.text }]}>{hint}</Text>}
     </Pressable>
   )
 }
 
+const tones: Record<Tone, { box: ViewStyle; text: string }> = {
+  brand: { box: { backgroundColor: color.brand, ...lift, shadowColor: color.brand, shadowOpacity: 0.3 }, text: '#fff' },
+  ok: { box: { backgroundColor: color.ok, ...lift }, text: '#fff' },
+  plain: { box: { backgroundColor: color.bg, borderWidth: 1.5, borderColor: color.line }, text: color.ink },
+  light: { box: { backgroundColor: '#fff', ...lift, shadowColor: '#000', shadowOpacity: 0.22 }, text: color.ink },
+  ghost: { box: { borderWidth: 2, borderColor: 'rgba(255,255,255,0.65)' }, text: '#fff' },
+}
+
 export const type = StyleSheet.create({
-  eyebrow: { fontSize: 16, color: color.muted, fontWeight: '600' },
-  title: { fontSize: 36, fontWeight: '700', color: color.ink, lineHeight: 42 },
-  body: { fontSize: 21, color: color.ink, lineHeight: 30 },
-  muted: { fontSize: 18, color: color.muted, lineHeight: 26 },
+  display: { fontSize: 52, fontWeight: '800', lineHeight: 56, letterSpacing: -1.2, color: color.ink },
+  title: { fontSize: 34, fontWeight: '700', lineHeight: 40, letterSpacing: -0.6, color: color.ink },
+  body: { fontSize: 21, lineHeight: 30, color: color.ink },
+  muted: { fontSize: 18, lineHeight: 26, color: color.muted },
+  label: { fontSize: 16, fontWeight: '600', color: color.muted },
 })
 
 const s = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: color.bg, paddingHorizontal: 24, paddingTop: 72, paddingBottom: 40, gap: 18 },
-  button: { minHeight: 68, borderRadius: 18, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 20 },
-  plain: { borderWidth: 1, borderColor: color.line },
-  buttonText: { color: '#fff', fontSize: 24, fontWeight: '700' },
+  screen: { flex: 1, backgroundColor: color.bg, paddingHorizontal: 24, paddingTop: 64, paddingBottom: 56, gap: 18 },
+  brand: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 8 },
+  logoChip: { width: 42, height: 42, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: '#fff' },
+  logo: { width: 34, height: 28 },
+  brandName: { fontSize: 17, fontWeight: '700', color: color.ink, letterSpacing: -0.2 },
+  brandSub: { fontSize: 13, color: color.muted, marginTop: 1 },
+  chip: { alignSelf: 'flex-start', flexDirection: 'row', borderRadius: 20, paddingHorizontal: 14, paddingVertical: 7, backgroundColor: color.panel, borderWidth: 1, borderColor: color.line },
+  chipText: { fontSize: 16, fontWeight: '600', color: color.ink, fontVariant: ['tabular-nums'] },
+  button: { minHeight: 72, borderRadius: 36, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24, paddingVertical: 10 },
+  buttonText: { fontSize: 23, fontWeight: '700', letterSpacing: -0.2 },
+  buttonHint: { fontSize: 14, opacity: 0.7, marginTop: 2 },
 })

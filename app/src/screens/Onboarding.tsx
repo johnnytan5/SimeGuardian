@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { Text, View } from 'react-native'
+import { StyleSheet, Text, View } from 'react-native'
 import * as Notifications from 'expo-notifications'
 import { post } from '../api'
-import { BigButton, Screen, type } from '../ui'
+import { Avatar, avatars, BigButton, Brand, color, Screen, type } from '../ui'
 
 export function Onboarding({ resident, familyContact }: { resident: string; familyContact: string }) {
   const [step, setStep] = useState(0)
@@ -10,14 +10,16 @@ export function Onboarding({ resident, familyContact }: { resident: string; fami
   if (step === 0) {
     return (
       <Screen>
-        <Text style={type.eyebrow}>SimeGuardian · a module for your township app</Text>
-        <Text style={type.title}>Hello, {resident}</Text>
+        <Brand />
+        <Avatar source={avatars.lee} size={96} ring={color.line} />
+        <Text style={type.display}>Hello, {resident}</Text>
         <Text style={type.body}>
-          SimeGuardian notices if your home has been unusually quiet for a long time, and checks that you're OK.
+          SimeGuardian notices if your home has been unusually quiet for a long time, and checks that you’re OK.
         </Text>
-        <Text style={type.body}>
-          Your family only sees a simple status. Never where you go or what you do. No cameras, nothing to wear.
-        </Text>
+        <View style={s.promise}>
+          <Text style={s.promiseLine}>No cameras. Nothing to wear.</Text>
+          <Text style={s.promiseLine}>Your family sees a simple status, never where you go.</Text>
+        </View>
         <View style={{ flex: 1 }} />
         <BigButton label="Continue" onPress={() => setStep(1)} />
       </Screen>
@@ -31,15 +33,35 @@ export function Onboarding({ resident, familyContact }: { resident: string; fami
 
   return (
     <Screen>
-      <Text style={type.eyebrow}>Step 2 of 2</Text>
-      <Text style={type.title}>{familyContact} is your contact</Text>
-      <Text style={type.body}>
-        If you don't reply to a check-in within 30 minutes, we'll let {familyContact} know. If we can't reach them,
-        township security will knock on your door.
-      </Text>
-      <Text style={type.muted}>You can turn on away mode or leave at any time. This is a wellbeing check, not an emergency service.</Text>
+      <Brand />
+      <Text style={type.title}>If your home goes quiet</Text>
+      <View style={s.steps}>
+        {[
+          ['We ask you first', 'A check-in appears on this phone.'],
+          [`${familyContact} after 5 minutes`, 'Only if you haven’t replied.'],
+          ['Security after 10 minutes', 'A guard knocks on your door.'],
+        ].map(([head, sub], i) => (
+          <View key={head} style={s.step}>
+            <View style={s.stepNum}><Text style={s.stepNumText}>{i + 1}</Text></View>
+            <View style={{ flex: 1 }}>
+              <Text style={[type.body, { fontWeight: '700' }]}>{head}</Text>
+              <Text style={type.muted}>{sub}</Text>
+            </View>
+          </View>
+        ))}
+      </View>
+      <Text style={type.muted}>Turn on away mode or leave at any time. This is a wellbeing check, not an emergency service.</Text>
       <View style={{ flex: 1 }} />
       <BigButton label="I agree" onPress={agree} />
     </Screen>
   )
 }
+
+const s = StyleSheet.create({
+  promise: { backgroundColor: color.panel, borderRadius: 22, padding: 18, gap: 6 },
+  promiseLine: { fontSize: 19, lineHeight: 27, color: color.ink, fontWeight: '600' },
+  steps: { gap: 18, marginTop: 4 },
+  step: { flexDirection: 'row', gap: 16, alignItems: 'flex-start' },
+  stepNum: { width: 40, height: 40, borderRadius: 20, backgroundColor: color.brand, alignItems: 'center', justifyContent: 'center' },
+  stepNumText: { color: '#fff', fontSize: 19, fontWeight: '800' },
+})
