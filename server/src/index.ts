@@ -1,7 +1,7 @@
 import http from 'node:http'
 import { readFile } from 'node:fs/promises'
 import { extname, join } from 'node:path'
-import { advanceGuard, checkIn, consent, createWorld, goQuiet, reset, setAway, tick } from './engine.ts'
+import { advanceGuard, checkIn, consent, createWorld, goQuiet, reset, seedRescue, setAway, tick } from './engine.ts'
 import { dashboardView, familyView, residentView, securityView } from './views.ts'
 
 const PUBLIC = join(import.meta.dirname, '..', 'public')
@@ -39,6 +39,7 @@ export function startServer(port: number): Promise<http.Server> {
     if (req.method === 'POST') {
       const body = await readJson(req)
       if (kind === 'reset') { reset(world, now); return { ok: true } }
+      if (kind === 'seed-rescue') { seedRescue(world); return { ok: true } }
       if (kind === 'settings') {
         if (typeof body.speed === 'number' && body.speed > 0) world.speed = body.speed
         if (typeof body.stepMs === 'number' && body.stepMs >= 1000) world.stepMs = body.stepMs

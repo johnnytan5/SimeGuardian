@@ -146,3 +146,92 @@ export function Modal({
     </dialog>
   );
 }
+
+export function Heading({
+  eyebrow = "TOWNSHIP WELLBEING",
+  title,
+  copy,
+  children,
+}: {
+  eyebrow?: string;
+  title: string;
+  copy: string;
+  children?: ReactNode;
+}) {
+  return (
+    <div className="page-heading">
+      <div>
+        <span className="eyebrow">{eyebrow}</span>
+        <h1>{title}</h1>
+        <p>{copy}</p>
+      </div>
+      {children}
+    </div>
+  );
+}
+export function Panel({
+  title,
+  copy,
+  children,
+  action,
+  className = "",
+}: {
+  title: string;
+  copy?: string;
+  children: ReactNode;
+  action?: ReactNode;
+  className?: string;
+}) {
+  return (
+    <section className={`panel ${className}`}>
+      <div className="panel-heading">
+        <div>
+          <h2>{title}</h2>
+          {copy && <p>{copy}</p>}
+        </div>
+        {action}
+      </div>
+      {children}
+    </section>
+  );
+}
+export function Empty({
+  title,
+  copy,
+  children,
+}: {
+  title: string;
+  copy: string;
+  children?: ReactNode;
+}) {
+  return (
+    <div className="empty">
+      <Icon name="shield" size={28} />
+      <h3>{title}</h3>
+      <p>{copy}</p>
+      {children}
+    </div>
+  );
+}
+export function Kpi({
+  title,
+  value,
+  copy,
+  tone = "",
+}: {
+  title: string;
+  value: ReactNode;
+  copy: string;
+  tone?: string;
+}) {
+  return (
+    <article className={`kpi ${tone}`}>
+      <div className="kpi-label">
+        {title}
+        <Icon name="grid" size={16} />
+      </div>
+      <div className="kpi-value">{value}</div>
+      <p>{copy}</p>
+    </article>
+  );
+}

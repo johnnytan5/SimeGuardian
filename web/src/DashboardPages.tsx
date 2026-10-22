@@ -18,7 +18,7 @@ import {
 } from "recharts";
 import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { api, type Role, type Snapshot } from "./api";
-import { Badge, Icon, Modal, when } from "./ui";
+import { Badge, Empty, Heading, Icon, Kpi, Modal, Panel, when } from "./ui";
 import {
   formatSignal,
   signalParameters,
@@ -34,9 +34,12 @@ import {
 import { TownshipUsage } from "./TownshipUsage";
 import { TownshipExplorer } from "./TownshipExplorer";
 import { AnomalyDemo } from "./AnomalyDemo";
+import { LiveCheckIn, LiveWelfareChecks } from "./LivePages";
 
 export const pages = [
   { name: "Overview", path: "/overview" },
+  { name: "Live check-in", path: "/live" },
+  { name: "Rescue", path: "/response" },
   { name: "Monitoring", path: "/pipeline" },
   { name: "Inference & incidents", path: "/inference" },
   { name: "Datasets", path: "/datasets" },
@@ -45,7 +48,6 @@ export const pages = [
   { name: "Model registry", path: "/models" },
   { name: "Operations", path: "/operations" },
   { name: "Anomaly detection", path: "/demo" },
-  { name: "Rescue", path: "/response" },
 ];
 type Event = { at: number; name: string; actor: string };
 type Incident = {
@@ -134,94 +136,6 @@ type Workspace = {
 };
 type Act = (action: string, extra?: Record<string, unknown>) => Promise<void>;
 
-function Heading({
-  eyebrow = "TOWNSHIP WELLBEING",
-  title,
-  copy,
-  children,
-}: {
-  eyebrow?: string;
-  title: string;
-  copy: string;
-  children?: ReactNode;
-}) {
-  return (
-    <div className="page-heading">
-      <div>
-        <span className="eyebrow">{eyebrow}</span>
-        <h1>{title}</h1>
-        <p>{copy}</p>
-      </div>
-      {children}
-    </div>
-  );
-}
-function Panel({
-  title,
-  copy,
-  children,
-  action,
-  className = "",
-}: {
-  title: string;
-  copy?: string;
-  children: ReactNode;
-  action?: ReactNode;
-  className?: string;
-}) {
-  return (
-    <section className={`panel ${className}`}>
-      <div className="panel-heading">
-        <div>
-          <h2>{title}</h2>
-          {copy && <p>{copy}</p>}
-        </div>
-        {action}
-      </div>
-      {children}
-    </section>
-  );
-}
-function Empty({
-  title,
-  copy,
-  children,
-}: {
-  title: string;
-  copy: string;
-  children?: ReactNode;
-}) {
-  return (
-    <div className="empty">
-      <Icon name="shield" size={28} />
-      <h3>{title}</h3>
-      <p>{copy}</p>
-      {children}
-    </div>
-  );
-}
-function Kpi({
-  title,
-  value,
-  copy,
-  tone = "",
-}: {
-  title: string;
-  value: ReactNode;
-  copy: string;
-  tone?: string;
-}) {
-  return (
-    <article className={`kpi ${tone}`}>
-      <div className="kpi-label">
-        {title}
-        <Icon name="grid" size={16} />
-      </div>
-      <div className="kpi-value">{value}</div>
-      <p>{copy}</p>
-    </article>
-  );
-}
 const label = (value: string) =>
   value.replaceAll("_", " ").replaceAll("-", " ");
 const time = (value: number) =>
@@ -382,15 +296,19 @@ function OperatorPages({
         <IncidentPage {...props} id={pathname.slice(11)} />
       ) : pathname === "/operations" ? (
         <Operations {...props} />
+      ) : pathname === "/live" ? (
+        <LiveCheckIn />
       ) : pathname === "/demo" ? (
         <Demo {...props} />
       ) : pathname === "/response" ? (
         <>
           <Heading
             title="Rescue"
-            copy="A separate, restricted view for assigned check-ins."
+            eyebrow="TOWNSHIP GUARDHOUSE"
+            copy="Units where nobody has answered a wellbeing check-in. Send a guard, check on the resident, and record what you found."
           />
-          <Panel title="Open the responder workspace">
+          <LiveWelfareChecks />
+          <Panel title="Replay responder workspace" copy="The MLflow replay keeps its own restricted responder tasks.">
             <Empty
               title="Switch to the seeded responder identity"
               copy="Use “Switch to responder” above. The backend issues a different session and restricts access to assigned tasks."

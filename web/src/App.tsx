@@ -30,6 +30,7 @@ import {
 import { DashboardPages, pages } from "./DashboardPages";
 import { DemoFlow, demoSteps } from "./DemoFlow";
 import { getRole, switchRole } from "./api";
+import { GuidedDemo, guidedDemoOnEntry, startTour } from "./GuidedDemo";
 
 export default function App() {
   const location = useLocation();
@@ -48,6 +49,19 @@ export default function App() {
     ? step.path === "/response"
     : step.routes.some((route) => location.pathname === route || location.pathname.startsWith(`${route}/`)));
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  // GUIDED_DEMO=true: start the guided demo once per browser session, on the operator's first entry.
+  useEffect(() => {
+    // Automated test browsers (navigator.webdriver) skip the auto-start; the Demo guide button still works.
+    if (!guidedDemoOnEntry || role !== "operator" || navigator.webdriver) return;
+    try {
+      if (sessionStorage.getItem("simeguardian-guide-seen")) return;
+      sessionStorage.setItem("simeguardian-guide-seen", "1");
+    } catch {
+      // Storage unavailable (private mode): still show the guide.
+    }
+    startTour();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const [data, setData] = useState<Snapshot | null>(null);
   const [error, setError] = useState("");
   const [actionError, setActionError] = useState("");
@@ -429,6 +443,7 @@ export default function App() {
         </div>
       </aside>
       <div className="main-shell">
+        <GuidedDemo />
         <header className="topbar">
           <DemoFlow />
           <div className="topbar-toolbar">
@@ -453,6 +468,9 @@ export default function App() {
                     ? "Connecting…"
                     : "Local prototype"}
               </span>
+              <button data-tour="demo-guide" className="button secondary demo-guide-button" onClick={startTour}>
+                Demo guide
+              </button>
               <button
                 className="icon-button"
                 aria-label="Refresh workspace"

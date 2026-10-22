@@ -3,10 +3,11 @@ import { getRole } from "./api";
 
 export const demoSteps = [
   { name: "Overview", path: "/overview", icon: "grid", routes: ["/overview"] },
+  { name: "Live check-in", path: "/live", icon: "clock", routes: ["/live"] },
+  { name: "Rescue", path: "/response", icon: "check", routes: ["/response"] },
   { name: "Monitoring", path: "/pipeline", icon: "layers", routes: ["/pipeline"] },
   { name: "Model training", path: "/training", icon: "flask", routes: ["/training", "/evaluation", "/models", "/datasets"] },
   { name: "Anomaly detection", path: "/demo", icon: "shield", routes: ["/demo", "/inference", "/incidents"] },
-  { name: "Rescue", path: "/response", icon: "check", routes: ["/response"] },
 ] as const;
 
 export function DemoFlow() {

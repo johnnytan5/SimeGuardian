@@ -1,7 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
-  createWorld, tick, goQuiet, checkIn, setAway, consent, advanceGuard, reset, explain, MIN,
+  createWorld, tick, goQuiet, checkIn, setAway, consent, advanceGuard, reset, explain, seedRescue, MIN,
   type World,
 } from './engine.ts'
 
@@ -14,15 +14,15 @@ function quietLee(realNow = 0): World {
   return w
 }
 
-test('createWorld seeds Madam Lee at 08:00, consented false, stepMs 10000', () => {
+test('createWorld seeds Madam Lee at 08:00, already opted in, stepMs 10000', () => {
   const w = createWorld(0)
   const lee = get(w, 'lee')
   assert.equal(lee.resident, 'Madam Lee')
-  assert.equal(lee.consented, false)
+  assert.equal(lee.consented, true)
   assert.equal(new Date(w.sim).getHours(), 8)
   assert.equal(w.stepMs, 10_000)
   assert.ok(w.households.length >= 4 && w.households.length <= 5)
-  assert.ok(w.households.filter(h => h.id !== 'lee').every(h => h.consented))
+  assert.ok(w.households.every(h => h.consented))
 })
 
 test('goQuiet jumps sim to threshold crossing and opens CHECKIN_PENDING', () => {
@@ -99,11 +99,12 @@ test('reset clears pending escalation', () => {
   tick(w, 40_000)
   assert.equal(get(w, 'lee').alert, null)
   assert.equal(w.log.length, 0)
-  assert.equal(get(w, 'lee').consented, false)
+  assert.equal(get(w, 'lee').consented, true)
 })
 
 test('not consented: goQuiet does nothing', () => {
   const w = createWorld(0)
+  get(w, 'lee').consented = false
   goQuiet(w, 'lee', 0)
   assert.equal(get(w, 'lee').alert, null)
 })
@@ -159,4 +160,38 @@ test('activity inside the quiet window is not hidden by the explanation', () => 
   assert.ok(h.activities.length > 0)
   const water = explain(h, w.sim).find(r => r.signal === 'water')!
   assert.ok(water.percentOfUsual! > 50, `normal routine reads near usual, got ${water.percentOfUsual}`)
+})
+
+test('a quiet window at night is compared with her active hours, not with ~0', () => {
+  const w = createWorld(0)
+  consent(w, 'lee')
+  const night = new Date(w.sim); night.setHours(2, 0, 0, 0)
+  w.sim = night.getTime() + 24 * 60 * MIN
+  goQuiet(w, 'lee', 0)
+  const by = Object.fromEntries(get(w, 'lee').alert!.reasons.map(r => [r.signal, r]))
+  assert.equal(by.water.concerning, true)
+  assert.equal(by.electricity.concerning, true)
+  assert.match(by.water.detail, /in active hours/)
+})
+
+test('seedRescue opens two welfare checks on neighbours and leaves Madam Lee free', () => {
+  const w = createWorld(0)
+  seedRescue(w)
+  const open = w.households.filter(h => h.alert?.state === 'SECURITY_ESCALATED').map(h => h.id).sort()
+  assert.deepEqual(open, ['kaur', 'wong'])
+  assert.equal(get(w, 'wong').alert!.guard, 'ON_THE_WAY')
+  assert.equal(get(w, 'lee').alert, null)
+  assert.ok(w.log.some(e => e.householdId === 'rahman' && e.type === 'resolved'))
+  for (let i = 1; i < w.log.length; i++) assert.ok(w.log[i - 1].sim <= w.log[i].sim, 'log stays in time order')
+})
+
+test('a sample shift does not freeze the clock, and loading it twice adds nothing', () => {
+  const w = createWorld(0)
+  seedRescue(w)
+  const logged = w.log.length
+  seedRescue(w)
+  assert.equal(w.log.length, logged)
+  const before = w.sim
+  tick(w, 5_000)
+  assert.ok(w.sim > before, 'clock keeps running while guards are pending')
 })

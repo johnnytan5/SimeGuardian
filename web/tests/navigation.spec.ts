@@ -32,7 +32,7 @@ for (const reducedMotion of [false, true]) {
     await page.goto("/overview");
     let flow = page.getByRole("dialog", { name: "Putra Heights" }).getByRole("navigation", { name: "Demo flow" });
     await expect(flow).toBeVisible();
-    for (const [index, stage] of ["Monitoring", "Model training", "Anomaly detection", "Rescue", "Overview"].entries()) {
+    for (const [index, stage] of ["Live check-in", "Rescue", "Monitoring", "Model training", "Anomaly detection", "Overview"].entries()) {
       if (!reducedMotion && index === 1) await page.evaluate(() => { (window as any).pauseMorph = true; });
       await flow.getByRole("link", { name: stage, exact: true }).focus();
       await page.keyboard.press("Enter");
@@ -85,9 +85,9 @@ for (const width of [1440, 900, 390]) {
       };
     });
     const overview = await dimensions();
-    expect(overview.steps).toHaveLength(5);
+    expect(overview.steps).toHaveLength(6);
     expect(overview.bar.height).toBe(width <= 680 ? 80 : 64);
-    for (const stage of ["Monitoring", "Model training", "Anomaly detection", "Rescue", "Overview"]) {
+    for (const stage of ["Live check-in", "Rescue", "Monitoring", "Model training", "Anomaly detection", "Overview"]) {
       await flow.getByRole("link", { name: stage, exact: true }).click();
       flow = stage === "Overview"
         ? page.getByRole("dialog", { name: "Putra Heights" }).getByRole("navigation", { name: "Demo flow" })
@@ -132,17 +132,17 @@ test("overview opens fullscreen by default and supports exit, re-entry and reloa
   await expect(page.getByRole("heading", { name: "Daily signal flow" })).toBeVisible();
 });
 
-test("demo flow connects the five pages and keeps the trimmed sidebar optional", async ({ page }) => {
+test("demo flow connects the six pages and keeps the trimmed sidebar optional", async ({ page }) => {
   await page.goto("/training");
   const flow = page.getByRole("navigation", { name: "Demo flow" });
   const sidebar = page.locator("#workspace-sidebar");
   await expect(sidebar).toBeHidden();
-  await expect(flow.getByRole("link")).toHaveText(["1Overview", "2Monitoring", "3Model training", "4Anomaly detection", "5Rescue"]);
+  await expect(flow.getByRole("link")).toHaveText(["1Overview", "2Live check-in", "3Rescue", "4Monitoring", "5Model training", "6Anomaly detection"]);
   await expect(flow.getByRole("link", { name: "Model training", exact: true })).toHaveAttribute("aria-current", "step");
   await page.locator(".topbar").screenshot({ path: "test-results/demo-flow-desktop.png" });
   await page.getByRole("button", { name: "Show sidebar" }).click();
   await expect(sidebar).toBeVisible();
-  await expect(sidebar.getByRole("link")).toHaveText(["Overview", "Monitoring", "Model training", "Anomaly detection", "Rescue"]);
+  await expect(sidebar.getByRole("link")).toHaveText(["Overview", "Live check-in", "Rescue", "Monitoring", "Model training", "Anomaly detection"]);
   await expect(page.getByRole("button", { name: "Hide sidebar" })).toHaveAttribute("aria-expanded", "true");
   await page.screenshot({ path: "test-results/demo-flow-sidebar.png" });
   await sidebar.getByRole("link", { name: "Anomaly detection", exact: true }).click();
@@ -233,7 +233,7 @@ test("responder navigation stays restricted to rescue", async ({ page }) => {
   const flow = page.getByRole("navigation", { name: "Demo flow" });
   await expect(page.getByRole("heading", { name: "Your assigned check-ins" })).toBeVisible();
   await expect(flow.getByRole("link")).toHaveCount(1);
-  await expect(flow.locator('[aria-disabled="true"]')).toHaveCount(4);
+  await expect(flow.locator('[aria-disabled="true"]')).toHaveCount(5);
   await expect(flow.getByRole("link", { name: "Rescue", exact: true })).toHaveAttribute("aria-current", "step");
   await page.getByRole("button", { name: "Show sidebar" }).click();
   await expect(page.getByRole("navigation", { name: "Workspace", exact: true }).getByRole("link")).toHaveCount(1);

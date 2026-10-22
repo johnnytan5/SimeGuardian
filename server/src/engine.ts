@@ -62,8 +62,8 @@ export function createWorld(realNow: number): World {
     sim, lastReal: realNow, speed: 120, stepMs: 10_000, log: [],
     households: seed().map(h => ({
       ...h, today: new Array(24).fill(0), lastActivity: sim, activities: [],
-      // Madam Lee consents on camera; the rest of the precinct is already enrolled
-      home: true, away: false, consented: h.id !== 'lee', quiet: false, alert: null,
+      // Everyone, Madam Lee included, starts opted in so the demo can begin straight away
+      home: true, away: false, consented: true, quiet: false, alert: null,
     })),
   }
 }
@@ -98,6 +98,13 @@ export function explain(h: Household, sim: number): Reason[] {
   const hours = (sim - from) / (60 * MIN)
   let usualEvents = 0
   for (let t = from; t < sim; t += 60 * MIN) usualEvents += h.baseline[hourOf(t)] * Math.min(1, (sim - t) / (60 * MIN))
+  // If the window falls in her usual quiet hours (e.g. the presenter triggers it at night), comparing with
+  // ~0 would read as normal; compare with her typical active-hours level instead.
+  const active = h.baseline.slice(AWAKE_FROM, AWAKE_UNTIL)
+  const activeEvents = active.reduce((sum, n) => sum + n, 0) / active.length * hours
+  const offHours = usualEvents < activeEvents * 0.25
+  if (offHours) usualEvents = activeEvents
+  const usually = offHours ? 'in active hours' : 'at this time'
   const recent = h.activities.filter(a => a.sim >= from)
   const window = `Last ${hours >= 1 ? `${+hours.toFixed(1)} h` : `${Math.round(hours * 60)} min`}`
 
@@ -108,6 +115,7 @@ export function explain(h: Household, sim: number): Reason[] {
   const ePct = pct(kwh, usualKwh), wPct = pct(litres, usualLitres)
 
   const morning = new Date(sim); morning.setHours(AWAKE_FROM, 0, 0, 0)
+  if (morning.getTime() > sim) morning.setDate(morning.getDate() - 1) // before dawn: since yesterday's 6 am
   const lastGate = h.activities.filter(a => a.gate && a.sim >= morning.getTime()).at(-1)
   const lastApp = h.activities.filter(a => a.app).at(-1)
   const appQuietH = lastApp ? (sim - lastApp.sim) / (60 * MIN) : null
@@ -115,10 +123,10 @@ export function explain(h: Household, sim: number): Reason[] {
   return [
     { signal: 'water', percentOfUsual: wPct, concerning: wPct !== null && wPct < 50,
       label: litres === 0 ? 'No water used' : `Water ${wPct}% of usual`,
-      detail: `${window}: ${fmt(litres, 'L')} (usually about ${fmt(usualLitres, 'L')})` },
+      detail: `${window}: ${fmt(litres, 'L')} (usually about ${fmt(usualLitres, 'L')} ${usually})` },
     { signal: 'electricity', percentOfUsual: ePct, concerning: ePct !== null && ePct < 50,
       label: `Electricity ${ePct}% of usual`,
-      detail: `${window}: ${fmt(kwh, 'kWh')}${ePct !== null && ePct < 50 ? ', about fridge level' : ''} (usually ${fmt(usualKwh, 'kWh')})` },
+      detail: `${window}: ${fmt(kwh, 'kWh')}${ePct !== null && ePct < 50 ? ', about fridge level' : ''} (usually ${fmt(usualKwh, 'kWh')} ${usually})` },
     { signal: 'gate', percentOfUsual: null, concerning: !lastGate,
       label: lastGate ? 'Access card used today' : 'No access card in or out today',
       detail: lastGate ? `Last used at the guardhouse at ${hhmm(lastGate.sim)}` : 'No gate entry or exit since 6 am' },
@@ -145,8 +153,9 @@ function resolve(w: World, h: Household, actor: Actor, text: string) {
 }
 
 export function tick(w: World, realNow: number): void {
-  // ponytail: one shared clock; it pauses while any alert is open so the log reads as real minutes
-  if (!w.households.some(active)) w.sim += (realNow - w.lastReal) * w.speed
+  // ponytail: one shared clock; it pauses during the timed resident/family stages so the log reads as
+  // real minutes. A welfare check waiting for a guard (e.g. a seeded sample shift) does not freeze it.
+  if (!w.households.some(h => h.alert?.phaseEndsAt != null)) w.sim += (realNow - w.lastReal) * w.speed
   w.lastReal = realNow
 
   for (const h of w.households) {
@@ -215,6 +224,38 @@ export function advanceGuard(w: World, id: string): void {
   w.sim += mins
   if (next === 'ARRIVED_SAFE') resolve(w, h, 'security', text)
   else log(w, h, 'guard', 'security', text)
+}
+
+// Sample guardhouse load for the Rescue page: two open welfare checks at different stages and two
+// cases closed earlier today, on the neighbours (Madam Lee stays free for the live demo).
+export function seedRescue(w: World): void {
+  if (w.log.some(e => e.householdId === 'rahman' && e.type === 'resolved')) return // already loaded
+  const at = (minsAgo: number) => w.sim - minsAgo * MIN
+  const past = (h: Household, minsAgo: number, type: string, actor: Actor, text: string) =>
+    w.log.push({ sim: at(minsAgo), householdId: h.id, type, actor, text })
+  const open = (id: string, startedMinsAgo: number, guard: GuardState) => {
+    const h = find(w, id)
+    h.consented = true
+    h.quiet = true
+    h.lastActivity = at(startedMinsAgo + h.thresholdMin)
+    h.activities = h.activities.filter(a => a.sim < h.lastActivity)
+    h.alert = { state: 'SECURITY_ESCALATED', guard, phaseEndsAt: null, startedSim: at(startedMinsAgo), reasons: explain(h, at(startedMinsAgo)) }
+    past(h, startedMinsAgo, 'threshold', 'system', `Inactive ${h.thresholdMin / 60}h 0m — check-in sent to ${h.resident}`)
+    past(h, startedMinsAgo - 5, 'family', 'system', `No reply in 5 min — ${h.familyContact} notified`)
+    past(h, startedMinsAgo - 10, 'security', 'system', 'No reply in 10 min — welfare check requested')
+    if (guard !== 'NONE') past(h, startedMinsAgo - 12, 'guard', 'security', 'Guard assigned')
+    if (guard === 'ON_THE_WAY') past(h, startedMinsAgo - 15, 'guard', 'security', 'Guard on the way')
+  }
+  open('wong', 18, 'ON_THE_WAY')
+  open('kaur', 11, 'NONE')
+
+  const rahman = find(w, 'rahman'), tan = find(w, 'tan')
+  past(rahman, 95, 'threshold', 'system', 'Inactive 3h 0m — check-in sent to Encik Rahman')
+  past(rahman, 85, 'security', 'system', 'No reply in 10 min — welfare check requested')
+  past(rahman, 70, 'resolved', 'security', 'Guard arrived — resident safe (was in the garden, phone indoors)')
+  past(tan, 60, 'threshold', 'system', 'Inactive 2h 30m — check-in sent to Mr Tan')
+  past(tan, 56, 'resolved', 'family', 'Mei Ling marked safe after a phone call')
+  w.log.sort((a, b) => a.sim - b.sim)
 }
 
 export function reset(w: World, realNow: number): void {
